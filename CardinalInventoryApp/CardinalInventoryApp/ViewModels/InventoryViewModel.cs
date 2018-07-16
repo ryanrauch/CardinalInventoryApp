@@ -73,7 +73,6 @@ namespace CardinalInventoryApp.ViewModels
             {
                 _totalItemsCounted = value;
                 RaisePropertyChanged(() => TotalItemsCounted);
-                RaisePropertyChanged(() => TotalItemsCountedMessage);
             }
         }
 
