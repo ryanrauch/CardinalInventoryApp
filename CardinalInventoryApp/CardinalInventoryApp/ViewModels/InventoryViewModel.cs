@@ -4,6 +4,7 @@ using CardinalInventoryApp.ViewModels.Base;
 using Microsoft.WindowsAzure.Storage.Blob;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -25,15 +26,30 @@ namespace CardinalInventoryApp.ViewModels
             _blobStorageService = blobStorageService;
             _requestService = requestService;
             _navigationService = navigationService;
+
+            for (int i = 5; i > 0; --i)
+            {
+                StockItemLevels.Add(new StockItemLevelViewModel(0.2M * i));
+            }
         }
 
         private Area _currentArea { get; set; }
 
-        private int _stockItemIndex = 0;
-        private int _imagePreloadCount = 3;
+        private int _stockItemIndex { get; set; } = 0;
 
         public ICommand NextStockItemCommand => new Command(async () => await NextStockItemTask());
         public ICommand SkipStockItemCommand => new Command(async () => await SkipStockItemTask());
+
+        private ObservableCollection<StockItemLevelViewModel> _stockItemLevels { get; set; } = new ObservableCollection<StockItemLevelViewModel>();
+        public ObservableCollection<StockItemLevelViewModel> StockItemLevels
+        {
+            get { return _stockItemLevels; }
+            set
+            {
+                _stockItemLevels = value;
+                RaisePropertyChanged(() => StockItemLevels);
+            }
+        }
 
         private String _statusMessage { get; set; } = String.Empty;
         public String StatusMessage
@@ -75,7 +91,8 @@ namespace CardinalInventoryApp.ViewModels
             get { return _selectedItemLevel; }
             set
             {
-                _selectedItemLevel = value;
+                _selectedItemLevel = Math.Round(value, 1);
+                //_selectedItemLevel = value;
                 RaisePropertyChanged(() => SelectedItemLevel);
             }
         }
@@ -92,25 +109,22 @@ namespace CardinalInventoryApp.ViewModels
                 ApplicationUserId = App.CurrentApplicationUserContract.Id,
                 AreaId = _currentArea.AreaId
             };
-            var res = await _requestService.PostAsync<InventoryActionHistory>("inventoryActionHistories", ah);
+            var res = await _requestService.PostAsync("inventoryActionHistories", ah);
             return res != null;
         }
 
         private async Task SkipStockItemTask()
         {
-            //if (!await CreateInventoryActionHistory())
-            //{
-            //    return;
-            //}
+            StatusMessage = "Item Skipped";
             if (++_stockItemIndex < _stockItems.Count)
             {
                 SelectedStockItem = _stockItems[_stockItemIndex];
                 SelectedImageSource = _stockItemImages[_stockItemIndex];
-                if (_stockItemIndex > 0)
-                {
-                    //clear out previous images
-                    _stockItemImages[_stockItemIndex - 1] = null;
-                }
+                //if (_stockItemIndex > 0)
+                //{
+                //    //clear out previous images
+                //    _stockItemImages[_stockItemIndex - 1] = null;
+                //}
             }
             else
             {
@@ -178,7 +192,7 @@ namespace CardinalInventoryApp.ViewModels
             var reqAreas = _requestService.GetAsync<List<Area>>("Areas");
             var reqStockItemCategories = _requestService.GetAsync<List<StockItemCategory>>("StockItemCategories");
             var reqStockItems = _requestService.GetAsync<List<StockItem>>("StockItems");
-            var reqBlobs = _blobStorageService.GetBlobs<CloudBlockBlob>("stockitemphotos");
+            var reqBlobs = _blobStorageService.GetBlobs<CloudBlockBlob>("stockitemspng");
             await Task.WhenAll(reqApplicationUsers,
                                reqBars, 
                                reqBuildings,

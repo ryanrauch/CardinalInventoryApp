@@ -7,5 +7,6 @@ namespace CardinalInventoryApp
     public static class Constants
     {
         public const string CardinalWebApiBase = "https://cardinalinventorywebapi.azurewebsites.net/api/";
+        public const uint AnimationDuration = 250;
     }
 }

@@ -39,9 +39,7 @@ namespace CardinalInventoryApp.Controls
 
         private float _cardDistance = 0;   // Distance the card has been moved
 
-        private const int _animationLength = 250; // Speed of the animations
-
-        private const float _cardRotationAdjuster = 0.3f; // Higher the number less the rotation effect
+        private const float _cardRotationAdjuster = 0.2f; // Higher the number less the rotation effect
 
         private float _cardMoveDistance { get; set; } = 50f;
 
@@ -58,8 +56,10 @@ namespace CardinalInventoryApp.Controls
             // Immediately move the back to the center
             if(e.PropertyName == SourceProperty.PropertyName)
             {
-                this.TranslateTo(-X, -Y, 0, null);
-                this.RotateTo(0, 0, null);
+                TranslationX = 0;
+                Rotation = 0;
+                //this.TranslateTo(-X, -Y, 0, null);
+                //this.RotateTo(0, 0, null);
             }
             else if(e.PropertyName == WidthProperty.PropertyName)
             {
@@ -119,7 +119,7 @@ namespace CardinalInventoryApp.Controls
                 // move off the screen
                 await this.TranslateTo(_cardDistance > 0 ? Width : -Width,
                                        0,
-                                       _animationLength,
+                                       Constants.AnimationDuration,
                                        Easing.SinIn);
                 if (SwipedRightCommand != null && _cardDistance > 0)
                 {
@@ -133,9 +133,13 @@ namespace CardinalInventoryApp.Controls
             else
             {
                 // Move the top card back to the center
-                await Task.WhenAll(this.TranslateTo(-X, -Y, _animationLength, Easing.SinIn),
-                                   this.RotateTo(0, _animationLength, Easing.SinIn));
+                //await Task.WhenAll(this.TranslateTo(0, 0, _animationLength, Easing.SinIn),
+                //                   this.RotateTo(0, _animationLength, Easing.SinIn));
+                await Task.WhenAll(this.TranslateTo(-(_cardDistance), 0, Constants.AnimationDuration, Easing.SinIn),
+                                   this.RotateTo(0, Constants.AnimationDuration, Easing.SinIn));
             }
+            TranslationX = 0;
+            Rotation = 0;
             _ignoreTouch = false;
         }
     }
