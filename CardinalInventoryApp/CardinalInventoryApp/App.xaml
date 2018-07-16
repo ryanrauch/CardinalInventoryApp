@@ -94,7 +94,7 @@
             <x:Double x:Key="HexRadius">40</x:Double>
             <x:Double x:Key="HexWidth">70</x:Double>
             <x:Double x:Key="HexColumnSpacing">10</x:Double>
-            <x:Double x:Key="HexRowSpacing">10</x:Double>
+            <x:Double x:Key="HexRowSpacing">5</x:Double>
             <x:Double x:Key="HexRowSpacingList">5</x:Double>
             <x:Double x:Key="HexBorderSize">4</x:Double>
 

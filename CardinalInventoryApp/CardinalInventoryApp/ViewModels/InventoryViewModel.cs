@@ -37,8 +37,11 @@ namespace CardinalInventoryApp.ViewModels
 
         private int _stockItemIndex { get; set; } = 0;
 
+        //public ICommand SkipStockItemCommand => new Command(async () => await SkipStockItemTask());
         public ICommand NextStockItemCommand => new Command(async () => await NextStockItemTask());
-        public ICommand SkipStockItemCommand => new Command(async () => await SkipStockItemTask());
+        public ICommand QuantityIncreaseCommand => new Command(async () => await IncreaseStockItemTask());
+        public ICommand QuantityDecreaseCommand => new Command(async () => await DecreaseStockItemTask());
+        public ICommand SelectItemLevelCommand => new Command<StockItemLevelViewModel>(async (svm) => await IncreaseStockItemTask(svm));
 
         private ObservableCollection<StockItemLevelViewModel> _stockItemLevels { get; set; } = new ObservableCollection<StockItemLevelViewModel>();
         public ObservableCollection<StockItemLevelViewModel> StockItemLevels
@@ -51,14 +54,93 @@ namespace CardinalInventoryApp.ViewModels
             }
         }
 
+        private DateTime _startedDateTime { get; set; } = DateTime.MinValue;
+        public DateTime StartedDateTime
+        {
+            get { return _startedDateTime; }
+            set
+            {
+                _startedDateTime = value;
+                RaisePropertyChanged(() => StartedDateTime);
+            }
+        }
+
+        private int _totalItemsCounted { get; set; } = 0;
+        public int TotalItemsCounted
+        {
+            get { return _totalItemsCounted; }
+            set
+            {
+                _totalItemsCounted = value;
+                RaisePropertyChanged(() => TotalItemsCounted);
+                RaisePropertyChanged(() => TotalItemsCountedMessage);
+            }
+        }
+
+        public String TotalItemsCountedMessage
+        {
+            get
+            {
+                if (StartedDateTime > DateTime.Now.AddMinutes(-1))
+                {
+                    return String.Format("{0} Total Bottles Inventoried in {1}mins",
+                                            TotalItemsCounted,
+                                            (int)(DateTime.Now.Subtract(StartedDateTime).TotalMinutes));
+                }
+                return String.Empty;
+            }
+        }
+
+        private DateTime _statusMessageSet { get; set; } = DateTime.MinValue;
+
         private String _statusMessage { get; set; } = String.Empty;
         public String StatusMessage
         {
-            get { return _statusMessage; }
+            get
+            {
+                String smt = String.Empty;
+                if(_statusMessageSet.Equals(DateTime.MinValue))
+                {
+                    return smt;
+                }
+                else if(_statusMessageSet > DateTime.Now.AddSeconds(-15))
+                {
+                    smt = "Just Now";
+                }
+                else if(_statusMessageSet > DateTime.Now.AddMinutes(-2))
+                {
+                    smt = "1min ago";
+                }
+                else if (_statusMessageSet > DateTime.Now.AddHours(-1))
+                {
+                    smt = String.Format("{0}mins ago", (int)(DateTime.Now.Subtract(_statusMessageSet).TotalMinutes));
+                }
+                else
+                {
+                    smt = String.Format("{0}hour(s) ago", (int)(DateTime.Now.Subtract(_statusMessageSet).TotalHours));
+                }
+                return String.Format("{0} [{1}]", _statusMessage,
+                                                  smt);
+            }
             set
             {
                 _statusMessage = value;
+                _statusMessageSet = DateTime.Now;
                 RaisePropertyChanged(() => StatusMessage);
+            }
+        }
+
+        public String SelectedItemCountMessage => String.Format("QTY: {0}", SelectedItemCount);
+
+        private int _selectedItemCount { get; set; } = 0;
+        public int SelectedItemCount
+        {
+            get { return _selectedItemCount; }
+            set
+            {
+                _selectedItemCount = value;
+                RaisePropertyChanged(() => SelectedItemCount);
+                RaisePropertyChanged(() => SelectedItemCountMessage);
             }
         }
 
@@ -80,8 +162,8 @@ namespace CardinalInventoryApp.ViewModels
             set
             {
                 _selectedStockItem = value;
+                SelectedItemCount = 0;
                 RaisePropertyChanged(() => SelectedStockItem);
-                //UpdateSelectedStockItemImage(_selectedStockItem);
             }
         }
 
@@ -91,66 +173,36 @@ namespace CardinalInventoryApp.ViewModels
             get { return _selectedItemLevel; }
             set
             {
-                _selectedItemLevel = Math.Round(value, 1);
-                //_selectedItemLevel = value;
+                _selectedItemLevel = value;
                 RaisePropertyChanged(() => SelectedItemLevel);
             }
         }
 
-        private async Task<bool> CreateInventoryActionHistory()
+        private async Task<bool> CreateInventoryActionHistory(Decimal level, InventoryAction action)
         {
             var ah = new InventoryActionHistory()
             {
                 InventoryActionHistoryId = Guid.NewGuid(),
-                Action = InventoryAction.UserViewedAuto,
+                Action = action,
                 StockItemId = SelectedStockItem.StockItemId,
                 Timestamp = DateTime.Now,
-                ItemLevel = SelectedItemLevel,
+                ItemLevel = level,
                 ApplicationUserId = App.CurrentApplicationUserContract.Id,
                 AreaId = _currentArea.AreaId
             };
+            SelectedItemLevel = level;
             var res = await _requestService.PostAsync("inventoryActionHistories", ah);
             return res != null;
         }
 
-        private async Task SkipStockItemTask()
+        private async Task NextStockItemTask()
         {
-            StatusMessage = "Item Skipped";
+            StatusMessage = "Next Item Loaded";
             if (++_stockItemIndex < _stockItems.Count)
             {
                 SelectedStockItem = _stockItems[_stockItemIndex];
                 SelectedImageSource = _stockItemImages[_stockItemIndex];
-                //if (_stockItemIndex > 0)
-                //{
-                //    //clear out previous images
-                //    _stockItemImages[_stockItemIndex - 1] = null;
-                //}
-            }
-            else
-            {
-                await _navigationService.NavigatePushAsync(new Views.ContentPages.InventoryCompletedView(), _currentArea);
-            }
-        }
-
-        private async Task NextStockItemTask()
-        {
-            if(!await CreateInventoryActionHistory())
-            {
-                StatusMessage = "CreateInventoryActionHistory::Failed";
-            }
-            else
-            {
-                StatusMessage = "Accepted";
-            }
-            SelectedImageSource = _stockItemImages[_stockItemIndex];
-            SelectedItemLevel = 1.0M;
-            return; //reset quantity & continue for multiple of same stockitem's with different qty.
-
-            if(++_stockItemIndex < _stockItems.Count)
-            {
-                SelectedStockItem = _stockItems[_stockItemIndex];
-                SelectedImageSource = _stockItemImages[_stockItemIndex];
-                if(_stockItemIndex > 0)
+                if (_stockItemIndex > 0)
                 {
                     //clear out previous images
                     _stockItemImages[_stockItemIndex - 1] = null;
@@ -160,6 +212,58 @@ namespace CardinalInventoryApp.ViewModels
             {
                 await _navigationService.NavigatePushAsync(new Views.ContentPages.InventoryCompletedView(), _currentArea);
             }
+        }
+
+        private bool OnTimer()
+        {
+            RaisePropertyChanged(() => TotalItemsCountedMessage);
+            RaisePropertyChanged(() => StatusMessage);
+            return true;
+        }
+
+        private async Task IncreaseStockItemTask(StockItemLevelViewModel svm)
+        {
+            if (!await CreateInventoryActionHistory(svm.ItemLevel, InventoryAction.UserViewedAuto))
+            {
+                StatusMessage = "CreateInventoryActionHistory::Failed";
+            }
+            else
+            {
+                StatusMessage = String.Format("{0} Inventory Saved", svm.LevelText);
+            }
+            SelectedItemCount++;
+            TotalItemsCounted++;
+            SelectedImageSource = _stockItemImages[_stockItemIndex];
+        }
+
+        private async Task IncreaseStockItemTask()
+        {
+            if(!await CreateInventoryActionHistory(1.0M, InventoryAction.UserViewedAuto))
+            {
+                StatusMessage = "CreateInventoryActionHistory::Failed";
+            }
+            else
+            {
+                StatusMessage = "Inventory Saved";
+            }
+            SelectedItemCount++;
+            TotalItemsCounted++;
+            SelectedImageSource = _stockItemImages[_stockItemIndex];
+        }
+
+        private async Task DecreaseStockItemTask()
+        {
+            if (!await CreateInventoryActionHistory(SelectedItemLevel, InventoryAction.RemovedDuringInventory))
+            {
+                StatusMessage = "CreateInventoryActionHistory::Remove::Failed";
+            }
+            else
+            {
+                StatusMessage = "Inventory Removed";
+            }
+            SelectedItemCount--;
+            TotalItemsCounted--;
+            SelectedImageSource = _stockItemImages[_stockItemIndex];
         }
 
         /************/
@@ -241,6 +345,9 @@ namespace CardinalInventoryApp.ViewModels
                     _stockItemImages[i] = ImageSource.FromUri(b.Uri);
                 }
             }
+            StartedDateTime = DateTime.Now;
+            Device.StartTimer(TimeSpan.FromSeconds(10), OnTimer);
+            OnTimer();
         }
     }
 }

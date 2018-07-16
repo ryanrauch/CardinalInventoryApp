@@ -11,24 +11,26 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="120"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="60"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="60"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="60"/>
-                <RowDefinition Height="30"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="25"/>
                 <RowDefinition Height="100"/>
-                <RowDefinition Height="30"/>
+                <RowDefinition Height="25"/>
             </Grid.RowDefinitions>
             <Label Grid.Row="0" 
                    Grid.Column="0"
-                   Grid.ColumnSpan="3"
+                   Grid.ColumnSpan="4"
                    BackgroundColor="{StaticResource CardinalBackgroundLightColor}" 
                    Text="Bar/Building/Area..."/>
-            
+
             <controls:HexagonListView Grid.Row="1"
                                       Grid.Column="0"
+                                      Margin="5,0,0,0"
                                       VerticalOptions="Center"
                                       ItemsSource="{Binding StockItemLevels}">
                 <controls:HexagonListView.ItemTemplate>
@@ -42,7 +44,7 @@
                                 <controls:HexagonButtonView Grid.Column="0"
                                                             Text="{Binding LevelText}">
                                     <controls:HexagonButtonView.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding Source={x:Reference InventoryViewContentPage}, Path=BindingContext.SelectPercentCommand}"
+                                        <TapGestureRecognizer Command="{Binding Source={x:Reference InventoryViewContentPage}, Path=BindingContext.SelectItemLevelCommand}"
                                                               CommandParameter="{Binding .}"/>
                                     </controls:HexagonButtonView.GestureRecognizers>
                                     <controls:HexagonButtonView.Behaviors>
@@ -59,32 +61,31 @@
                     </DataTemplate>
                 </controls:HexagonListView.ItemTemplate>
             </controls:HexagonListView>
-            
-            
+
+
             <controls:SwipeImage Grid.Row="1"
                                  Grid.Column="1"
-                                 Grid.ColumnSpan="2"
+                                 Grid.ColumnSpan="3"
                                  Source="{Binding SelectedImageSource}"
                                  IsVisible="{Binding SwipeImageVisible}"
-                                 SwipedRightCommand="{Binding NextStockItemCommand}"
-                                 SwipedLeftCommand="{Binding SkipStockItemCommand}"/>
-            
-            
+                                 SwipedRightCommand="{Binding QuantityIncreasCommand}"
+                                 SwipedLeftCommand="{Binding NextStockItemCommand}"/>
+
+
             <!--Bottle Description-->
             <Label Grid.Row="2" 
                    Grid.Column="0"
-                   Grid.ColumnSpan="2"
+                   Grid.ColumnSpan="3"
                    HorizontalTextAlignment="Center" 
                    VerticalTextAlignment="Center"
                    TextColor="{StaticResource CardinalHighlightColor}"
                    BackgroundColor="{StaticResource CardinalBackgroundLightColor}"
                    Text="{Binding SelectedStockItem.Description}"
-                   FontSize="{StaticResource H2}"/>
+                   FontSize="{StaticResource H3}"/>
             <Label Grid.Row="2"
-                   Grid.Column="2"
+                   Grid.Column="3"
                    HorizontalTextAlignment="Center" 
                    VerticalTextAlignment="Center"
-                   VerticalOptions="StartAndExpand"
                    Text="1L"
                    BackgroundColor="{StaticResource CardinalRedDarkColor}"
                    TextColor="{StaticResource CardinalBackgroundColor}"
@@ -92,8 +93,9 @@
 
             <Label Grid.Row="3" 
                    Grid.Column="0"
-                   Grid.ColumnSpan="3"
+                   Grid.ColumnSpan="4"
                    HorizontalTextAlignment="Center" 
+                   FontSize="{StaticResource H7}"
                    Text="{Binding StatusMessage}"/>
 
             <!--minus-arrow-->
@@ -101,7 +103,7 @@
                                         Grid.Column="0"
                                         FAText="&#xf056;">
                 <controls:HexagonButtonView.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding NextStockItemCommand}"/>
+                    <TapGestureRecognizer Command="{Binding QuantityDecreaseCommand}"/>
                 </controls:HexagonButtonView.GestureRecognizers>
                 <controls:HexagonButtonView.Behaviors>
                     <behaviors:ViewTappedButtonBehavior/>
@@ -113,15 +115,16 @@
                    HorizontalTextAlignment="Center"
                    VerticalTextAlignment="Center"
                    TextColor="{StaticResource CardinalRedLightColor}"
-                   Text="QTY: 4..."
-                   FontSize="{StaticResource H3}"/>
+                   Text="{Binding SelectedItemCountMessage}"
+                   FontSize="{StaticResource H2}"/>
 
             <!--plus-arrow-->
             <controls:HexagonButtonView Grid.Row="4" 
                                         Grid.Column="2"
+                                        Grid.ColumnSpan="2"
                                         FAText="&#xf055;">
                 <controls:HexagonButtonView.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding NextStockItemCommand}"/>
+                    <TapGestureRecognizer Command="{Binding QuantityIncreaseCommand}"/>
                 </controls:HexagonButtonView.GestureRecognizers>
                 <controls:HexagonButtonView.Behaviors>
                     <behaviors:ViewTappedButtonBehavior/>
@@ -130,68 +133,12 @@
 
             <Label Grid.Row="5"
                    Grid.Column="0"
-                   Grid.ColumnSpan="3"
+                   Grid.ColumnSpan="4"
                    HorizontalTextAlignment="Center" 
+                   VerticalTextAlignment="Center"
+                   FontSize="{StaticResource H6}"
                    BackgroundColor="{StaticResource CardinalBackgroundLightColor}"
-                   Text="Total Count / Time Elapsed..."/>
+                   Text="{Binding TotalItemsCountedMessage}"/>
         </Grid>
-        <!--<Grid Style="{StaticResource GridContentPageStyle}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="3*"/>
-                <RowDefinition Height="80"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="80"/>
-                <RowDefinition Height="80"/>
-                <RowDefinition Height="30"/>
-            </Grid.RowDefinitions>
-            <controls:SwipeImage Grid.Row="0"
-                                 Source="{Binding SelectedImageSource}"
-                                 IsVisible="{Binding SwipeImageVisible}"
-                                 SwipedRightCommand="{Binding NextStockItemCommand}"
-                                 SwipedLeftCommand="{Binding SkipStockItemCommand}"/>
-            <StackLayout Grid.Row="1"
-                         BackgroundColor="{StaticResource CardinalBackgroundLightColor}"
-                         Orientation="Vertical">
-                <Label HorizontalTextAlignment="Center" 
-                       Text="{Binding SelectedStockItem.Description}"
-                       FontSize="{StaticResource H2}"/>
-                <Label HorizontalTextAlignment="Center" 
-                       Text="{Binding SelectedStockItem.ImagePath}"
-                       FontSize="{StaticResource H4}"/>
-            </StackLayout>
-            <StackLayout Grid.Row="2"
-                         Orientation="Vertical"
-                         BackgroundColor="{StaticResource CardinalBackgroundLightColor}">
-                <Slider 
-                    Minimum="0.1"
-                    Maximum="1.0"
-                    Margin="20,0,20,0"
-                    Value="{Binding SelectedItemLevel, Mode=TwoWay}"/>
-                <Label HorizontalTextAlignment="Center" 
-                       Text="{Binding SelectedItemLevel, StringFormat='{0:P0}'}"/>
-            </StackLayout>
-            --><!--minus-arrow--><!--
-            <controls:HexagonButtonView Grid.Row="3" FAText="&#xf056;">
-                <controls:HexagonButtonView.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding NextStockItemCommand}"/>
-                </controls:HexagonButtonView.GestureRecognizers>
-                <controls:HexagonButtonView.Behaviors>
-                    <behaviors:ViewTappedButtonBehavior/>
-                </controls:HexagonButtonView.Behaviors>
-            </controls:HexagonButtonView>
-            --><!--plus-arrow--><!--
-            <controls:HexagonButtonView Grid.Row="4" FAText="&#xf055;">
-                <controls:HexagonButtonView.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding NextStockItemCommand}"/>
-                </controls:HexagonButtonView.GestureRecognizers>
-                <controls:HexagonButtonView.Behaviors>
-                    <behaviors:ViewTappedButtonBehavior/>
-                </controls:HexagonButtonView.Behaviors>
-            </controls:HexagonButtonView>
-            
-            <Label Grid.Row="5" 
-                   HorizontalTextAlignment="Center" 
-                   Text="{Binding StatusMessage}"/>
-        </Grid>-->
     </ContentPage.Content>
 </local:InventoryViewBase>

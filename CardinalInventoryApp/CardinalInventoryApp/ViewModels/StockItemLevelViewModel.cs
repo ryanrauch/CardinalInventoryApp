@@ -7,6 +7,10 @@ namespace CardinalInventoryApp.ViewModels
     public class StockItemLevelViewModel
     {
         private Decimal _itemLevel { get; set; }
+        public Decimal ItemLevel
+        {
+            get { return _itemLevel; }
+        }
 
         public StockItemLevelViewModel(Decimal level)
         {
