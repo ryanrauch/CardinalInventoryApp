@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<local:InventoryViewBase xmlns="http://xamarin.com/schemas/2014/forms"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                         xmlns:local="clr-namespace:CardinalInventoryApp.Views.ContentPages"
+                         xmlns:controls="clr-namespace:CardinalInventoryApp.Controls"
+                         x:Class="CardinalInventoryApp.Views.ContentPages.InventoryView">
+    <ContentPage.Content>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <controls:SwipeImage Grid.Row="0"
+                                 Source="{Binding SelectedImageSource}"
+                                 IsVisible="{Binding SwipeImageVisible}"
+                                 SwipedRightCommand="{Binding NextStockItemCommand}"
+                                 SwipedLeftCommand="{Binding SkipStockItemCommand}"/>
+            <StackLayout Grid.Row="1" 
+                         Orientation="Vertical">
+                <Slider Grid.Row="1"
+                    Minimum="0.1"
+                    Maximum="1.0"
+                    Margin="20,0,20,0"
+                    Value="{Binding SelectedItemLevel, Mode=TwoWay}"/>
+                <Label HorizontalTextAlignment="Center" 
+                       Text="{Binding SelectedItemLevel, StringFormat='{0:P0}'}"/>
+            </StackLayout>
+            <StackLayout Grid.Row="2"
+                         Orientation="Vertical">
+                <Label HorizontalTextAlignment="Center" 
+                       Text="{Binding SelectedStockItem.Description}"/>
+                <Label HorizontalTextAlignment="Center" 
+                       Text="{Binding SelectedStockItem.ImagePath}"/>
+            </StackLayout>
+            <Label HorizontalTextAlignment="Center" 
+                       Text="{Binding StatusMessage}"/>
+        </Grid>
+    </ContentPage.Content>
+</local:InventoryViewBase>

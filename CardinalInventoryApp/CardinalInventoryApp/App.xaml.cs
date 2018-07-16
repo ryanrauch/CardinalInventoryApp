@@ -1,3 +1,6 @@
+using Autofac;
+using CardinalInventoryApp.Contracts;
+using CardinalInventoryApp.Views.ContentPages;
 using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -5,16 +8,20 @@ using Xamarin.Forms.Xaml;
 [assembly: XamlCompilation (XamlCompilationOptions.Compile)]
 namespace CardinalInventoryApp
 {
-	public partial class App : Application
-	{
-		public App ()
-		{
-			InitializeComponent();
+    public partial class App : Application
+    {
+        public static IContainer Container { get; set; }
+        public static ApplicationUserContract CurrentApplicationUserContract { get; set; }
 
-			MainPage = new MainPage();
-		}
+        public App()
+        {
+            InitializeComponent();
+            Container = AutoFacContainerBuilder.CreateContainer();
+            //MainPage = new InitialView();
+            MainPage = new InventoryView();
+        }
 
-		protected override void OnStart ()
+        protected override void OnStart ()
 		{
 			// Handle when your app starts
 		}
