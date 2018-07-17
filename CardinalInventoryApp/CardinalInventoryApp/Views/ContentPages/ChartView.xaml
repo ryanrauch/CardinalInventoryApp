@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<local:ChartViewBase xmlns="http://xamarin.com/schemas/2014/forms"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                     xmlns:local="clr-namespace:CardinalInventoryApp.Views.ContentPages"
+                     xmlns:microcharts="clr-namespace:Microcharts.Forms;assembly=Microcharts.Forms"
+                     x:Class="CardinalInventoryApp.Views.ContentPages.ChartView">
+    <ContentPage.Content>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <microcharts:ChartView Grid.Row="0" 
+                                   HeightRequest="200"
+                                   WidthRequest="350"
+                                   Chart="{Binding InventoryActionChart}"/>
+        </Grid>
+    </ContentPage.Content>
+</local:ChartViewBase>

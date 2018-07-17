@@ -18,7 +18,8 @@ namespace CardinalInventoryApp
             InitializeComponent();
             Container = AutoFacContainerBuilder.CreateContainer();
             //MainPage = new InitialView();
-            MainPage = new InventoryView();
+            //MainPage = new InventoryView();
+            MainPage = new ChartView();
         }
 
         protected override void OnStart ()
