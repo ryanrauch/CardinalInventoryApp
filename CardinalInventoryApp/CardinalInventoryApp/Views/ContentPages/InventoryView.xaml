@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <local:InventoryViewBase xmlns="http://xamarin.com/schemas/2014/forms"
                          xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                          xmlns:local="clr-namespace:CardinalInventoryApp.Views.ContentPages"
@@ -68,7 +68,7 @@
                                  Grid.ColumnSpan="3"
                                  Source="{Binding SelectedImageSource}"
                                  IsVisible="{Binding SwipeImageVisible}"
-                                 SwipedRightCommand="{Binding QuantityIncreasCommand}"
+                                 SwipedRightCommand="{Binding QuantityIncreaseCommand}"
                                  SwipedLeftCommand="{Binding NextStockItemCommand}"/>
 
 

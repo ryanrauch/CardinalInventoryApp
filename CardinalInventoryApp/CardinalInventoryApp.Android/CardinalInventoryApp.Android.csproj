@@ -54,6 +54,9 @@
     <PackageReference Include="Xamarin.Android.Support.v4" Version="27.0.2.1" />
     <PackageReference Include="Xamarin.Android.Support.v7.CardView" Version="27.0.2.1" />
     <PackageReference Include="Xamarin.Android.Support.v7.MediaRouter" Version="27.0.2.1" />
+    <PackageReference Include="Microcharts.Forms">
+      <Version>0.8.3-pre</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainActivity.cs" />
@@ -95,7 +98,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CardinalInventoryApp\CardinalInventoryApp.csproj">
-      <Project>{AB966F32-B29C-4995-8FDD-5233164A495A}</Project>
+      <Project>{D6AB4235-F600-424C-959B-22B24C92B0AC}</Project>
       <Name>CardinalInventoryApp</Name>
     </ProjectReference>
   </ItemGroup>
