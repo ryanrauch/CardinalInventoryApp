@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using CardinalInventoryApp.Services.Interfaces;
 using CardinalInventoryApp.ViewModels.Base;
-using Microcharts;
-using SkiaSharp;
 
 namespace CardinalInventoryApp.ViewModels
 {
@@ -20,76 +19,119 @@ namespace CardinalInventoryApp.ViewModels
         {
             _requestService = requestService;
             _watchSessionManager = watchSessionManager;
-            //_watchSessionManager = Xamarin.Forms.DependencyService.Get<IWatchSessionManager>();
             _watchSessionManager.DataReceived += _watchSessionManager_DataReceived;
         }
 
-        private void _watchSessionManager_DataReceived(object sender, WatchDataEventArgs e)
+        private ObservableCollection<string> _gyroList { get; set; }
+        public ObservableCollection<string> GyroList
         {
-            switch(e.WatchDataType)
-            {
-                case WatchDataType.GyroDataX:
-                    _entries.Add(new Entry((float)Convert.ToDouble(e.Data)));
-                    break;
-                default:
-                    _entries.Add(new Entry(-33.0f));
-                    break;
-            }
-            UpdateMotionChart();
-        }
-
-        private List<Entry> _entries { get; set; } = new List<Entry>();
-
-        private Chart _motionChart { get; set; } = new LineChart();
-        public Chart MotionChart
-        {
-            get { return _motionChart; }
+            get { return _gyroList; }
             set
             {
-                _motionChart = value;
-                RaisePropertyChanged(() => MotionChart);
+                _gyroList = value;
+                RaisePropertyChanged(() => GyroList);
             }
         }
 
-        private void UpdateMotionChart()
+        private ObservableCollection<string> _accelList { get; set; }
+        public ObservableCollection<string> AccelList
         {
-            var mc = new LineChart
+            get { return _accelList; }
+            set
             {
-                Entries = _entries
-            };
-            MotionChart = mc;
+                _accelList = value;
+                RaisePropertyChanged(() => AccelList);
+            }
+        }
+
+        private ObservableCollection<string> _deviceMotionList { get; set; }
+        public ObservableCollection<string> DeviceMotionList
+        {
+            get { return _deviceMotionList; }
+            set
+            {
+                _deviceMotionList = value;
+                RaisePropertyChanged(() => DeviceMotionList);
+            }
+        }
+
+        private ObservableCollection<string> _deviceMotionAttitudeList { get; set; }
+        public ObservableCollection<string> DeviceMotionAttitudeList
+        {
+            get { return _deviceMotionAttitudeList; }
+            set
+            {
+                _deviceMotionAttitudeList = value;
+                RaisePropertyChanged(() => DeviceMotionAttitudeList);
+            }
+        }
+
+        private ObservableCollection<string> _deviceMotionAccellList { get; set; }
+        public ObservableCollection<string> DeviceMotionAccelList
+        {
+            get { return _deviceMotionAccellList; }
+            set
+            {
+                _deviceMotionAccellList = value;
+                RaisePropertyChanged(() => DeviceMotionAccelList);
+            }
+        }
+        private void _watchSessionManager_DataReceived(object sender, WatchDataEventArgs e)
+        {
+            int rowCount = 14;
+            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+            {
+                switch (e.WatchDataType)
+                {
+                    case WatchDataType.GyroData:
+                        GyroList.Add(e.Data);
+                        if(GyroList.Count > rowCount)
+                        {
+                            GyroList.RemoveAt(0);
+                        }
+                        break;
+                    case WatchDataType.AccelData:
+                        AccelList.Add(e.Data);
+                        if(AccelList.Count > rowCount)
+                        {
+                            AccelList.RemoveAt(0);
+                        }
+                        break;
+                    case WatchDataType.DeviceMotionRotationRateData:
+                        DeviceMotionList.Add(e.Data);
+                        if(DeviceMotionList.Count > rowCount)
+                        {
+                            DeviceMotionList.RemoveAt(0);
+                        }
+                        break;
+                    case WatchDataType.DeviceMotionAttitudeData:
+                        DeviceMotionAttitudeList.Add(e.Data);
+                        if (DeviceMotionAttitudeList.Count > rowCount)
+                        {
+                            DeviceMotionAttitudeList.RemoveAt(0);
+                        }
+                        break;
+                    case WatchDataType.DeviveMotionAccelData:
+                        DeviceMotionAccelList.Add(e.Data);
+                        if (DeviceMotionAccelList.Count > rowCount)
+                        {
+                            DeviceMotionAccelList.RemoveAt(0);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            });
         }
 
         public override Task OnAppearingAsync()
         {
-             _entries = new List<Entry>
-             {
-                 new Entry(212)
-                 {
-                     Label = "UWP",
-                     ValueLabel = "212",
-                     Color = SKColor.Parse("#2c3e50")
-                 },
-                 new Entry(248)
-                 {
-                     Label = "Android",
-                     ValueLabel = "248",
-                     Color = SKColor.Parse("#77d065")
-                 },
-                 new Entry(128)
-                 {
-                     Label = "iOS",
-                     ValueLabel = "128",
-                     Color = SKColor.Parse("#b455b6")
-                 },
-                 new Entry(514)
-                 {
-                     Label = "Shared",
-                     ValueLabel = "514",
-                     Color = SKColor.Parse("#3498db")
-                 }
-            };
-            UpdateMotionChart();
+            GyroList = new ObservableCollection<string>();
+            AccelList = new ObservableCollection<string>();
+            DeviceMotionList = new ObservableCollection<string>();
+            DeviceMotionAttitudeList = new ObservableCollection<string>();
+            DeviceMotionAccelList = new ObservableCollection<string>();
+            _watchSessionManager.StartSession();
             return Task.CompletedTask;
         }
     }

@@ -37,6 +37,17 @@ namespace CardinalInventoryApp.iOS.DependencyServices
             StartWCSession();
         }
 
+        public void StopSession()
+        {
+            _session = null;
+        }
+
+        public void SendData(WatchDataType type, double x, double y, double z)
+        {
+            string data = string.Format("{0}:{1}:{2}", x, y, z);
+            SendData(type, data);
+        }
+
         public void SendData(WatchDataType type, string data)
         {
             var context = new Dictionary<string, object>

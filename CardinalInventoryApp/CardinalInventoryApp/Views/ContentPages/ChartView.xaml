@@ -1,8 +1,7 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <local:ChartViewBase xmlns="http://xamarin.com/schemas/2014/forms"
                      xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                      xmlns:local="clr-namespace:CardinalInventoryApp.Views.ContentPages"
-                     xmlns:microcharts="clr-namespace:Microcharts.Forms;assembly=Microcharts.Forms"
                      x:Class="CardinalInventoryApp.Views.ContentPages.ChartView">
     <ContentPage.Content>
         <Grid>
@@ -10,10 +9,65 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <microcharts:ChartView Grid.Row="0" 
-                                   HeightRequest="200"
-                                   WidthRequest="350"
-                                   Chart="{Binding MotionChart}"/>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+<!--            <ListView Grid.Row="0"
+                      Grid.Column="0"
+                      Header="Gyroscope"
+                      RowHeight="20"
+                      ItemsSource="{Binding GyroList}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextCell Text="{Binding .}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>-->
+            <ListView Grid.Row="0"
+                      Grid.Column="0"
+                      Header="UserAcceleration"
+                      RowHeight="20"
+                      ItemsSource="{Binding DeviceMotionAccelList}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextCell Text="{Binding .}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <ListView Grid.Row="0"
+                      Grid.Column="1"
+                      Header="Accelerometer"
+                      RowHeight="20"
+                      ItemsSource="{Binding AccelList}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextCell Text="{Binding .}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <ListView Grid.Row="1"
+                      Grid.Column="0"
+                      Header="DeviceMotionRotationRate"
+                      RowHeight="20"
+                      ItemsSource="{Binding DeviceMotionList}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextCell Text="{Binding .}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <ListView Grid.Row="1"
+                      Grid.Column="1"
+                      Header="DeviceMotionAttitude"
+                      RowHeight="20"
+                      ItemsSource="{Binding DeviceMotionAttitudeList}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextCell Text="{Binding .}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
         </Grid>
     </ContentPage.Content>
 </local:ChartViewBase>

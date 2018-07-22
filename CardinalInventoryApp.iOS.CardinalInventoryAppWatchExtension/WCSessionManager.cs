@@ -10,12 +10,11 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
 {
     public enum WatchDataType
     {
-        GyroDataX,
-        GyroDataY,
-        GyroDataZ,
-        AccelDataX,
-        AccelDataY,
-        AccelDataZ
+        GyroData,
+        AccelData,
+        DeviceMotionRotationRateData,
+        DeviceMotionAttitudeData,
+        DeviveMotionAccelData
     };
 
     public class WatchDataEventArgs : EventArgs
@@ -32,29 +31,25 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
         public WatchDataEventArgs(string wdt, string data)
         {
             Data = data;
-            if (wdt.Equals(WatchDataType.GyroDataX.ToString()))
+            if (wdt.Equals(WatchDataType.GyroData.ToString()))
             {
-                WatchDataType = WatchDataType.GyroDataX;
+                WatchDataType = WatchDataType.GyroData;
             }
-            else if (wdt.Equals(WatchDataType.GyroDataY.ToString()))
+            else if (wdt.Equals(WatchDataType.AccelData.ToString()))
             {
-                WatchDataType = WatchDataType.GyroDataY;
+                WatchDataType = WatchDataType.AccelData;
             }
-            else if (wdt.Equals(WatchDataType.GyroDataZ.ToString()))
+            else if (wdt.Equals(WatchDataType.DeviceMotionRotationRateData.ToString()))
             {
-                WatchDataType = WatchDataType.GyroDataZ;
+                WatchDataType = WatchDataType.DeviceMotionRotationRateData;
             }
-            else if (wdt.Equals(WatchDataType.AccelDataX.ToString()))
+            else if (wdt.Equals(WatchDataType.DeviceMotionAttitudeData.ToString()))
             {
-                WatchDataType = WatchDataType.AccelDataX;
+                WatchDataType = WatchDataType.DeviceMotionAttitudeData;
             }
-            else if (wdt.Equals(WatchDataType.AccelDataY.ToString()))
+            else if (wdt.Equals(WatchDataType.DeviveMotionAccelData.ToString()))
             {
-                WatchDataType = WatchDataType.AccelDataY;
-            }
-            else if (wdt.Equals(WatchDataType.AccelDataZ.ToString()))
-            {
-                WatchDataType = WatchDataType.AccelDataZ;
+                WatchDataType = WatchDataType.DeviveMotionAccelData;
             }
         }
     }
@@ -70,7 +65,7 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
 #if __IOS__
             return _session.Paired;
 #else
-            return true;
+            return _validSession != null;
 #endif
         }
 
@@ -84,8 +79,20 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
             StartWCSession();
         }
 
+        public void StopSession()
+        {
+            _session = null;
+        }
+
+        public void SendData(WatchDataType type, double x, double y, double z)
+        {
+            string data = string.Format("{0:0.000}:{1:0.000}:{2:0.000}", x, y, z);
+            SendData(type, data);
+        }
+
         public void SendData(WatchDataType type, string data)
         {
+            Console.WriteLine(type.ToString() + "-" + data);
             var context = new Dictionary<string, object>
             {
                 { type.ToString(), data }

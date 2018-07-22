@@ -3,24 +3,25 @@ using System.Collections.Generic;
 
 namespace CardinalInventoryApp.Services.Interfaces
 {
-    public enum WatchDataType
-    {
-        GyroDataX,
-        GyroDataY,
-        GyroDataZ,
-        AccelDataX,
-        AccelDataY,
-        AccelDataZ
-    };
-
     public interface IWatchSessionManager
     {
         event EventHandler<WatchDataEventArgs> DataReceived;
         bool IsPairedSession();
         bool IsReachableSession();
         void StartSession();
+        void StopSession();
         void SendData(WatchDataType type, string data);
+        void SendData(WatchDataType type, double x, double y, double z);
     }
+
+    public enum WatchDataType
+    {
+        GyroData,
+        AccelData,
+        DeviceMotionRotationRateData,
+        DeviceMotionAttitudeData,
+        DeviveMotionAccelData
+    };
 
     public class WatchDataEventArgs : EventArgs
     {
@@ -36,29 +37,25 @@ namespace CardinalInventoryApp.Services.Interfaces
         public WatchDataEventArgs(string wdt, string data)
         {
             Data = data;
-            if (wdt.Equals(WatchDataType.GyroDataX.ToString()))
+            if (wdt.Equals(WatchDataType.GyroData.ToString()))
             {
-                WatchDataType = WatchDataType.GyroDataX;
+                WatchDataType = WatchDataType.GyroData;
             }
-            else if (wdt.Equals(WatchDataType.GyroDataY.ToString()))
+            else if (wdt.Equals(WatchDataType.AccelData.ToString()))
             {
-                WatchDataType = WatchDataType.GyroDataY;
+                WatchDataType = WatchDataType.AccelData;
             }
-            else if (wdt.Equals(WatchDataType.GyroDataZ.ToString()))
+            else if (wdt.Equals(WatchDataType.DeviceMotionRotationRateData.ToString()))
             {
-                WatchDataType = WatchDataType.GyroDataZ;
+                WatchDataType = WatchDataType.DeviceMotionRotationRateData;
             }
-            else if (wdt.Equals(WatchDataType.AccelDataX.ToString()))
+            else if (wdt.Equals(WatchDataType.DeviceMotionAttitudeData.ToString()))
             {
-                WatchDataType = WatchDataType.AccelDataX;
+                WatchDataType = WatchDataType.DeviceMotionAttitudeData;
             }
-            else if (wdt.Equals(WatchDataType.AccelDataY.ToString()))
+            else if (wdt.Equals(WatchDataType.DeviveMotionAccelData.ToString()))
             {
-                WatchDataType = WatchDataType.AccelDataY;
-            }
-            else if (wdt.Equals(WatchDataType.AccelDataZ.ToString()))
-            {
-                WatchDataType = WatchDataType.AccelDataZ;
+                WatchDataType = WatchDataType.DeviveMotionAccelData;
             }
         }
     }
