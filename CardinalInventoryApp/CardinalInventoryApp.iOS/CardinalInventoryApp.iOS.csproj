@@ -169,6 +169,13 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <ItemGroup>
+    <ProjectReference Include="..\..\CardinalInventoryApp.watchOS\CardinalInventoryApp.watchOS.WatchOSApp\CardinalInventoryApp.watchOS.WatchOSApp.csproj">
+      <Project>{a0e9284b-b8ee-4a26-a98d-33c26d29caad}</Project>
+      <Name>CardinalInventoryApp.watchOS.WatchOSApp</Name>
+      <IsAppExtension>false</IsAppExtension>
+      <IsWatchApp>true</IsWatchApp>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
     <ProjectReference Include="..\CardinalInventoryApp\CardinalInventoryApp.csproj">
       <Project>{D6AB4235-F600-424C-959B-22B24C92B0AC}</Project>
       <Name>CardinalInventoryApp</Name>
