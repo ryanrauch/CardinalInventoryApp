@@ -109,6 +109,8 @@
     <BundleResource Include="Resources\fa-solid-900.ttf" />
     <BundleResource Include="Resources\highlandgothiclightflf.ttf" />
     <BundleResource Include="Resources\fa-regular-400.ttf" />
+    <Compile Include="Renderers\ChartViewRenderer.cs" />
+    <Compile Include="Renderers\WCSessionManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Resources\LaunchScreen.storyboard" />
