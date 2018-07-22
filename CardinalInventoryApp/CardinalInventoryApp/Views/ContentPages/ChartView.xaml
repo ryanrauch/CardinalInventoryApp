@@ -13,7 +13,7 @@
             <microcharts:ChartView Grid.Row="0" 
                                    HeightRequest="200"
                                    WidthRequest="350"
-                                   Chart="{Binding InventoryActionChart}"/>
+                                   Chart="{Binding MotionChart}"/>
         </Grid>
     </ContentPage.Content>
 </local:ChartViewBase>

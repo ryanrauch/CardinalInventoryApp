@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using CardinalInventoryApp.Services.Interfaces;
 using CardinalInventoryApp.ViewModels.Base;
@@ -14,6 +16,19 @@ namespace CardinalInventoryApp.ViewModels
         public ChartViewModel(IRequestService requestService)
         {
             _requestService = requestService;
+        }
+
+        private List<Entry> _entries { get; set; } = new List<Entry>();
+
+        private Chart _motionChart { get; set; } = new LineChart();
+        public Chart MotionChart
+        {
+            get { return _motionChart; }
+            set
+            {
+                _motionChart = value;
+                RaisePropertyChanged(() => MotionChart);
+            }
         }
 
         public Chart InventoryActionChart => new LineChart()
@@ -45,7 +60,7 @@ namespace CardinalInventoryApp.ViewModels
             BackgroundColor = SKColors.Transparent,
         };
 
-        public override async Task OnAppearingAsync()
+        public override Task OnAppearingAsync()
         {
             var entries = new[]
              {
@@ -74,9 +89,13 @@ namespace CardinalInventoryApp.ViewModels
                      Color = SKColor.Parse("#3498db")
                  }
             };
-            InventoryActionChart.Entries = entries;
-            RaisePropertyChanged(() => InventoryActionChart);
-            await Task.Delay(10);
+            var mc = new LineChart
+            {
+                Entries = entries
+            };
+
+            MotionChart = mc;
+            return Task.CompletedTask;
         }
     }
 }
