@@ -30,6 +30,9 @@
     <MtouchTlsProvider>Default</MtouchTlsProvider>
     <DeviceSpecificBuild>false</DeviceSpecificBuild>
     <CodesignProvision />
+    <CodesignExtraArgs />
+    <CodesignResourceRules />
+    <CodesignEntitlements />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugType>pdbonly</DebugType>
@@ -89,6 +92,9 @@
     <MtouchTlsProvider>Default</MtouchTlsProvider>
     <IOSDebugOverWiFi>true</IOSDebugOverWiFi>
     <IOSDebuggerPort>10001</IOSDebuggerPort>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
+    <AppExtensionDebugBundleId />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
