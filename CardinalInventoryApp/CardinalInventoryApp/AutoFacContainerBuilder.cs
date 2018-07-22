@@ -5,6 +5,7 @@ using CardinalInventoryApp.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Xamarin.Forms;
 
 namespace CardinalInventoryApp
 {
@@ -23,6 +24,8 @@ namespace CardinalInventoryApp
             containerBuilder.RegisterType<UnAuthenticatedRequestService>().As<IRequestService>().SingleInstance();
             containerBuilder.RegisterType<BlobStorageService>().As<IBlobStorageService>().SingleInstance();
             containerBuilder.RegisterType<SinglePageNavigationService>().As<INavigationService>().SingleInstance();
+
+            containerBuilder.RegisterInstance(DependencyService.Get<IWatchSessionManager>()).AsImplementedInterfaces().SingleInstance();
 
             return containerBuilder.Build();
         }

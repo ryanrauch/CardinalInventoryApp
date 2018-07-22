@@ -12,10 +12,30 @@ namespace CardinalInventoryApp.ViewModels
     public class ChartViewModel : ViewModelBase
     {
         private readonly IRequestService _requestService;
+        private readonly IWatchSessionManager _watchSessionManager;
 
-        public ChartViewModel(IRequestService requestService)
+        public ChartViewModel(
+            IRequestService requestService,
+            IWatchSessionManager watchSessionManager)
         {
             _requestService = requestService;
+            _watchSessionManager = watchSessionManager;
+            //_watchSessionManager = Xamarin.Forms.DependencyService.Get<IWatchSessionManager>();
+            _watchSessionManager.DataReceived += _watchSessionManager_DataReceived;
+        }
+
+        private void _watchSessionManager_DataReceived(object sender, WatchDataEventArgs e)
+        {
+            switch(e.WatchDataType)
+            {
+                case WatchDataType.GyroDataX:
+                    _entries.Add(new Entry((float)Convert.ToDouble(e.Data)));
+                    break;
+                default:
+                    _entries.Add(new Entry(-33.0f));
+                    break;
+            }
+            UpdateMotionChart();
         }
 
         private List<Entry> _entries { get; set; } = new List<Entry>();
@@ -31,38 +51,18 @@ namespace CardinalInventoryApp.ViewModels
             }
         }
 
-        public Chart InventoryActionChart => new LineChart()
+        private void UpdateMotionChart()
         {
-            Entries= new[]
+            var mc = new LineChart
             {
-                 new Entry(212)
-                 {
-                     Label = "UWP",
-                     ValueLabel = "212",
-                     Color = SKColor.Parse("#2c3e50")
-                 },
-                 new Entry(248)
-                 {
-                     Label = "Android",
-                     ValueLabel = "248",
-                     Color = SKColor.Parse("#77d065")
-                 },
-                 new Entry(128)
-                 {
-                     Label = "iOS",
-                     ValueLabel = "128",
-                     Color = SKColor.Parse("#b455b6")
-                 }
-            },
-            LineMode = LineMode.Straight,
-            PointMode = PointMode.None,
-            LineSize = 8,
-            BackgroundColor = SKColors.Transparent,
-        };
+                Entries = _entries
+            };
+            MotionChart = mc;
+        }
 
         public override Task OnAppearingAsync()
         {
-            var entries = new[]
+             _entries = new List<Entry>
              {
                  new Entry(212)
                  {
@@ -89,12 +89,7 @@ namespace CardinalInventoryApp.ViewModels
                      Color = SKColor.Parse("#3498db")
                  }
             };
-            var mc = new LineChart
-            {
-                Entries = entries
-            };
-
-            MotionChart = mc;
+            UpdateMotionChart();
             return Task.CompletedTask;
         }
     }
