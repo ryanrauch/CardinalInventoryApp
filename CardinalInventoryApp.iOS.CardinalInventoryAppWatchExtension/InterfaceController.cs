@@ -1,12 +1,18 @@
 ﻿using System;
 
-using Foundation;
 using WatchKit;
+using Foundation;
 
-namespace Blank.WatchOSExtension
+namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
 {
     public partial class InterfaceController : WKInterfaceController
     {
+        partial void OnButtonPress()
+        {
+            myLabel.SetText("clicked");
+            //throw new NotImplementedException();
+        }
+
         protected InterfaceController(IntPtr handle) : base(handle)
         {
             // Note: this .ctor should not contain any initialization logic.
@@ -18,6 +24,7 @@ namespace Blank.WatchOSExtension
 
             // Configure interface objects here.
             Console.WriteLine("{0} awake with context", this);
+            myLabel.SetText("label");
         }
 
         public override void WillActivate()
@@ -31,12 +38,5 @@ namespace Blank.WatchOSExtension
             // This method is called when the watch view controller is no longer visible to the user.
             Console.WriteLine("{0} did deactivate", this);
         }
-        int clickCount = 0;
-        partial void OnButtonPress()
-        {
-            var msg = String.Format("Clicked {0} times", ++clickCount);
-            myLabel.SetText(msg);
-        }
     }
 }
-

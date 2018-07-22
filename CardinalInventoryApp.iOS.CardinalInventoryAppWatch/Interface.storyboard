@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <document type="com.apple.InterfaceBuilder.WatchKit.Storyboard" version="3.0" toolsVersion="6221" systemVersion="14A389" targetRuntime="watchKit" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="AgC-eL-Hgc">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="6213"/>
@@ -10,16 +10,16 @@
             <objects>
                 <controller id="AgC-eL-Hgc" customClass="InterfaceController" customModuleProvider="">
                     <items>
-                        <button width="1" alignment="left" title="Button" id="44">
+                        <button width="1" alignment="left" title="Button" id="42">
                             <connections>
-                                <action selector="OnButtonPress:" destination="AgC-eL-Hgc" id="46"/>
+                                <action selector="OnButtonPress" destination="AgC-eL-Hgc" id="43"/>
                             </connections>
                         </button>
-                        <label alignment="left" text="Label" id="45" width="0" height="20" textAlignment="center"/>
+                        <label alignment="left" text="Label" id="44"/>
                     </items>
                     <connections>
-                        <outlet property="myLabel" destination="45" id="name-outlet-45"/>
-                        <outlet property="myButton" destination="44" id="name-outlet-44"/>
+                        <outlet property="myLabel" destination="44" id="name-outlet-44"/>
+                        <outlet property="myButton" destination="42" id="name-outlet-42"/>
                     </connections>
                 </controller>
             </objects>

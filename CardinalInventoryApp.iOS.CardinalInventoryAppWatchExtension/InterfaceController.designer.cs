@@ -1,4 +1,4 @@
-﻿// WARNING
+// WARNING
 //
 // This file has been generated automatically by Visual Studio from the outlets and
 // actions declared in your storyboard file.
@@ -8,7 +8,7 @@ using Foundation;
 using System;
 using System.CodeDom.Compiler;
 
-namespace Blank.WatchOSExtension
+namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
 {
     [Register ("InterfaceController")]
     partial class InterfaceController
@@ -21,7 +21,7 @@ namespace Blank.WatchOSExtension
         [GeneratedCode ("iOS Designer", "1.0")]
         WatchKit.WKInterfaceLabel myLabel { get; set; }
 
-        [Action ("OnButtonPress:")]
+        [Action ("OnButtonPress")]
         [GeneratedCode ("iOS Designer", "1.0")]
         partial void OnButtonPress ();
 

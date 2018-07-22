@@ -27,8 +27,8 @@ namespace CardinalInventoryApp.Services
             var blobList = new List<T>();
             BlobContinuationToken continuationToken = null;
 
-            try
-            {
+            //try
+            //{
                 do
                 {
                     var response = await blobContainer.ListBlobsSegmentedAsync(prefix, true, blobListingDetails, maxresultsPerQuery, continuationToken, null, null);
@@ -41,11 +41,11 @@ namespace CardinalInventoryApp.Services
                     }
 
                 } while (continuationToken != null);
-            }
-            catch (Exception e)
-            {
-                //Handle Exception
-            }
+            //}
+            //catch (Exception e)
+            //{
+            //    //Handle Exception
+            //}
 
             return blobList;
         }
