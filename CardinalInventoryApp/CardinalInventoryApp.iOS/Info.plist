@@ -40,5 +40,7 @@
 	</array>
 	<key>CFBundleName</key>
 	<string>Cardinal Inventory</string>
+  <key>NSCameraUsageDescription</key>
+	<string>to scan barcodes</string>
 </dict>
 </plist>
