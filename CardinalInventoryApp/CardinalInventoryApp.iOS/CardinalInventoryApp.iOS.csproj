@@ -112,7 +112,17 @@
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
     <Compile Include="Renderers\HexagonButtonViewRenderer.cs" />
+    <Compile Include="Renderers\NotWorkingScanBarcodeViewBaseRenderer.cs" />
     <Compile Include="Renderers\ScanBarcodeViewBaseRenderer.cs" />
+    <Compile Include="ScanBarcode\BarcodeScanner.cs" />
+    <Compile Include="ScanBarcode\EventArgsT.cs" />
+    <Compile Include="ScanBarcode\Extensions.cs" />
+    <Compile Include="ScanBarcode\IRectangleViewer.cs" />
+    <Compile Include="ScanBarcode\ObjectTracker.cs" />
+    <Compile Include="ScanBarcode\Overlay.cs" />
+    <Compile Include="ScanBarcode\RectangleScanner.cs" />
+    <Compile Include="ScanBarcode\VideoCapture.cs" />
+    <Compile Include="ScanBarcode\VideoCaptureDelegate.cs" />
     <None Include="Entitlements.plist" />
     <None Include="Info.plist">
       <SubType>Designer</SubType>

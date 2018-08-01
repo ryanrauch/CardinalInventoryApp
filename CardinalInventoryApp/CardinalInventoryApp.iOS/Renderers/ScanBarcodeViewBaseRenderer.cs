@@ -4,233 +4,181 @@ using System.Linq;
 using System.Text;
 using AVFoundation;
 using CardinalInventoryApp.iOS.Renderers;
+using CardinalInventoryApp.iOS.ScanBarcode;
 using CardinalInventoryApp.Views.ContentPages;
 using CoreGraphics;
+using CoreVideo;
 using Foundation;
 using UIKit;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
+
 
 [assembly: ExportRenderer(typeof(ScanBarcodeView), typeof(ScanBarcodeViewBaseRenderer))]
 namespace CardinalInventoryApp.iOS.Renderers
 {
     public class ScanBarcodeViewBaseRenderer : PageRenderer
     {
-        AVCaptureSession captureSession;
-        AVCaptureDeviceInput captureDeviceInput;
-        AVCaptureStillImageOutput stillImageOutput;
-        UIView liveCameraStream;
-        UIButton takePhotoButton;
-        UIButton toggleCameraButton;
-        UIButton toggleFlashButton;
+        VideoCapture captureController;
+        VideoCaptureDelegate captureDelegate;
+        //RectangleScanner scanner;
+        BarcodeScanner barcodeScanner;
+        ObjectTracker tracker;
+        IRectangleViewer activeViewer;
+
+        AVCaptureVideoPreviewLayer previewLayer;
+        Overlay overlay;
+        UIView topBlurView;
+        UIView bottomBlurView;
+        UIView previewView;
+        UIImageView bufferImageView = new UIImageView();
+        UIButton resetButton;
 
         protected override void OnElementChanged(VisualElementChangedEventArgs e)
         {
             base.OnElementChanged(e);
-
-            if (e.OldElement != null || Element == null)
-            {
-                return;
-            }
-
-            try
-            {
-                SetupUserInterface();
-                SetupEventHandlers();
-                SetupLiveCameraStream();
-                AuthorizeCameraUse();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(@"           ERROR: ", ex.Message);
-            }
         }
 
-        void SetupUserInterface()
+        public override void ViewDidLoad()
         {
-            var centerButtonX = View.Bounds.GetMidX() - 35f;
-            var topLeftX = View.Bounds.X + 25;
-            var topRightX = View.Bounds.Right - 65;
-            var bottomButtonY = View.Bounds.Bottom - 150;
-            var topButtonY = View.Bounds.Top + 15;
-            var buttonWidth = 70;
-            var buttonHeight = 70;
+            base.ViewDidLoad();
+            previewView = new UIView();
+            previewView.Frame = View.Bounds;
+            View.AddSubview(previewView);
 
-            liveCameraStream = new UIView()
-            {
-                Frame = new CGRect(0f, 0f, View.Bounds.Width, View.Bounds.Height)
-            };
+            ConfigureBlurViews(View);
+            View.AddSubview(ConfigureResetButton());
+            View.AddSubview(ConfigureOverlay(topBlurView, bottomBlurView));
+            View.AddSubview(ConfigureBufferImageView());
 
-            takePhotoButton = new UIButton()
-            {
-                Frame = new CGRect(centerButtonX, bottomButtonY, buttonWidth, buttonHeight)
-            };
-            takePhotoButton.SetBackgroundImage(UIImage.FromFile("TakePhotoButton.png"), UIControlState.Normal);
+            ConfigureInitialVisionTask();
 
-            toggleCameraButton = new UIButton()
-            {
-                Frame = new CGRect(topRightX, topButtonY + 5, 35, 26)
-            };
-            toggleCameraButton.SetBackgroundImage(UIImage.FromFile("ToggleCameraButton.png"), UIControlState.Normal);
-
-            toggleFlashButton = new UIButton()
-            {
-                Frame = new CGRect(topLeftX, topButtonY, 37, 37)
-            };
-            toggleFlashButton.SetBackgroundImage(UIImage.FromFile("NoFlashButton.png"), UIControlState.Normal);
-
-            View.Add(liveCameraStream);
-            View.Add(takePhotoButton);
-            View.Add(toggleCameraButton);
-            View.Add(toggleFlashButton);
+            previewLayer = new AVCaptureVideoPreviewLayer(captureController.Session);
+            previewView.Layer.AddSublayer(previewLayer);
         }
 
-        void SetupEventHandlers()
+        private UIView ConfigureBufferImageView()
         {
-            takePhotoButton.TouchUpInside += (object sender, EventArgs e) => {
-                CapturePhoto();
-            };
-
-            toggleCameraButton.TouchUpInside += (object sender, EventArgs e) => {
-                ToggleFrontBackCamera();
-            };
-
-            toggleFlashButton.TouchUpInside += (object sender, EventArgs e) => {
-                ToggleFlash();
-            };
+            bufferImageView.Frame = new CGRect(10, 30, 108, 115);
+            return bufferImageView;
         }
 
-        async void CapturePhoto()
+        private UIView ConfigureOverlay(UIView tbv, UIView bbv)
         {
-            var videoConnection = stillImageOutput.ConnectionFromMediaType(AVMediaType.Video);
-            var sampleBuffer = await stillImageOutput.CaptureStillImageTaskAsync(videoConnection);
-            var jpegImage = AVCaptureStillImageOutput.JpegStillToNSData(sampleBuffer);
+            //Configure layer on which we do our graphics
+            overlay = new Overlay
+            {
+                Frame = new CGRect(tbv.Frame.Left, tbv.Frame.Bottom + 5, tbv.Frame.Right, bbv.Frame.Top - tbv.Frame.Bottom - 10),
+                BackgroundColor = UIColor.Clear
+            };
+            return overlay;
+        }
 
-            var photo = new UIImage(jpegImage);
-            photo.SaveToPhotosAlbum((image, error) => {
-                Console.Error.WriteLine(@"              Error: ", error);
+
+        private UIView ConfigureResetButton()
+        {
+            resetButton = new UIButton();
+            resetButton.SetTitle("Reset", UIControlState.Normal);
+            resetButton.Hidden = true;
+            resetButton.TouchDown += ResetTracking;
+            resetButton.TranslatesAutoresizingMaskIntoConstraints = false;
+            resetButton.Frame = new CGRect(View.Frame.Right - 180, 40, 150, 50);
+            return resetButton;
+        }
+
+        void ConfigureInitialVisionTask()
+        {
+            // Assert overlay initialized
+            barcodeScanner = new BarcodeScanner(overlay);
+            //scanner = new RectangleScanner(overlay);
+            tracker = new ObjectTracker(overlay);
+
+            activeViewer = barcodeScanner;
+            captureDelegate = new VideoCaptureDelegate(OnFrameCaptured);
+            captureController = new VideoCapture(captureDelegate);
+        }
+
+        void ResetTracking(Object sender, EventArgs e)
+        {
+            overlay.Message = "Scanning Barcodes...";
+            activeViewer = barcodeScanner;
+            resetButton.Hidden = true;
+        }
+
+        private void ConfigureBlurViews(UIView mainView)
+        {
+            var blur = UIBlurEffect.FromStyle(UIBlurEffectStyle.Regular);
+            topBlurView = new UIVisualEffectView(blur);
+            mainView.AddSubview(topBlurView);
+            bottomBlurView = new UIVisualEffectView(blur);
+            mainView.AddSubview(bottomBlurView);
+        }
+
+        /// <summary>
+		/// Handles frame captured event: forwards frame to active viewer, displays frame
+		/// </summary>
+		/// <param name="sender">The `VideoCaptureDelegate` delegate-object</param>
+		/// <param name="args">EventArgsT containing the (processed) frame</param>
+		void OnFrameCaptured(Object sender, EventArgsT<CVPixelBuffer> args)
+        {
+            var buffer = args.Value;
+            activeViewer.OnFrameCaptured(buffer);
+
+            // Display it
+            var img = VideoCapture.ImageBufferToUIImage(buffer);
+            overlay.BeginInvokeOnMainThread(() =>
+            {
+                var oldImg = bufferImageView.Image;
+                if (oldImg != null)
+                {
+                    oldImg.Dispose();
+                }
+                bufferImageView.Image = img;
+                bufferImageView.SetNeedsDisplay();
             });
         }
 
-        void ToggleFrontBackCamera()
+        /// <summary>
+		/// Sees if the touch is inside a detected rectangle. If so, switches to "Tracking" mode
+		/// </summary>
+		/// <param name="touches">Touches.</param>
+		/// <param name="evt">Evt.</param>
+		public override void TouchesBegan(NSSet touches, UIEvent evt)
         {
-            var devicePosition = captureDeviceInput.Device.Position;
-            if (devicePosition == AVCaptureDevicePosition.Front)
+            base.TouchesBegan(touches, evt);
+
+            var touch = touches.First() as UITouch;
+            var pt = touch.LocationInView(overlay);
+            var normalizedPoint = new CGPoint(pt.X / overlay.Frame.Width, pt.Y / overlay.Frame.Height);
+            if (activeViewer == barcodeScanner)
             {
-                devicePosition = AVCaptureDevicePosition.Back;
-            }
-            else
-            {
-                devicePosition = AVCaptureDevicePosition.Front;
-            }
-
-            var device = GetCameraForOrientation(devicePosition);
-            ConfigureCameraForDevice(device);
-
-            captureSession.BeginConfiguration();
-            captureSession.RemoveInput(captureDeviceInput);
-            captureDeviceInput = AVCaptureDeviceInput.FromDevice(device);
-            captureSession.AddInput(captureDeviceInput);
-            captureSession.CommitConfiguration();
-        }
-
-        void ToggleFlash()
-        {
-            var device = captureDeviceInput.Device;
-
-            var error = new NSError();
-            if (device.HasFlash)
-            {
-                if (device.FlashMode == AVCaptureFlashMode.On)
+                var trackedRectangle = barcodeScanner.Containing(normalizedPoint);
+                if (trackedRectangle != null)
                 {
-                    device.LockForConfiguration(out error);
-                    device.FlashMode = AVCaptureFlashMode.Off;
-                    device.UnlockForConfiguration();
-                    toggleFlashButton.SetBackgroundImage(UIImage.FromFile("NoFlashButton.png"), UIControlState.Normal);
-                }
-                else
-                {
-                    device.LockForConfiguration(out error);
-                    device.FlashMode = AVCaptureFlashMode.On;
-                    device.UnlockForConfiguration();
-                    toggleFlashButton.SetBackgroundImage(UIImage.FromFile("FlashButton.png"), UIControlState.Normal);
+                    tracker.Track(trackedRectangle);
+                    overlay.Message = "Target acquired";
+                    activeViewer = tracker;
+                    resetButton.Hidden = false;
                 }
             }
         }
 
-        AVCaptureDevice GetCameraForOrientation(AVCaptureDevicePosition orientation)
+        public override void ViewDidLayoutSubviews()
         {
-            var devices = AVCaptureDevice.DevicesWithMediaType(AVMediaType.Video);
+            base.ViewDidLayoutSubviews();
+            previewLayer.Frame = previewView.Bounds;
 
-            foreach (var device in devices)
-            {
-                if (device.Position == orientation)
-                {
-                    return device;
-                }
-            }
-            return null;
+            var oneFifthHeight = previewLayer.Frame.Height / 5;
+            topBlurView.Frame = new CGRect(previewLayer.Frame.Left, previewLayer.Frame.Top, previewLayer.Frame.Right, oneFifthHeight);
+            bottomBlurView.Frame = new CGRect(previewLayer.Frame.Left, previewLayer.Frame.Bottom - oneFifthHeight, previewLayer.Frame.Right, oneFifthHeight);
+            overlay.Frame = new CGRect(topBlurView.Frame.Left, topBlurView.Frame.Bottom, topBlurView.Frame.Right, bottomBlurView.Frame.Top - topBlurView.Frame.Bottom);
+            resetButton.Frame = new CGRect(View.Frame.Right - 180, 40, 150, 50);
         }
 
-        void SetupLiveCameraStream()
+        public override void DidReceiveMemoryWarning()
         {
-            captureSession = new AVCaptureSession();
-
-            var viewLayer = liveCameraStream.Layer;
-            var videoPreviewLayer = new AVCaptureVideoPreviewLayer(captureSession)
-            {
-                Frame = liveCameraStream.Bounds
-            };
-            liveCameraStream.Layer.AddSublayer(videoPreviewLayer);
-
-            //var captureDevice = AVCaptureDevice.DefaultDeviceWithMediaType(AVMediaType.Video);
-            var captureDevice = AVCaptureDevice.GetDefaultDevice(AVMediaType.Video);
-
-            ConfigureCameraForDevice(captureDevice);
-            captureDeviceInput = AVCaptureDeviceInput.FromDevice(captureDevice);
-
-            var dictionary = new NSMutableDictionary();
-            dictionary[AVVideo.CodecKey] = new NSNumber((int)AVVideoCodec.JPEG);
-            stillImageOutput = new AVCaptureStillImageOutput()
-            {
-                OutputSettings = new NSDictionary()
-            };
-
-            captureSession.AddOutput(stillImageOutput);
-            captureSession.AddInput(captureDeviceInput);
-            captureSession.StartRunning();
-        }
-
-        void ConfigureCameraForDevice(AVCaptureDevice device)
-        {
-            var error = new NSError();
-            if (device.IsFocusModeSupported(AVCaptureFocusMode.ContinuousAutoFocus))
-            {
-                device.LockForConfiguration(out error);
-                device.FocusMode = AVCaptureFocusMode.ContinuousAutoFocus;
-                device.UnlockForConfiguration();
-            }
-            else if (device.IsExposureModeSupported(AVCaptureExposureMode.ContinuousAutoExposure))
-            {
-                device.LockForConfiguration(out error);
-                device.ExposureMode = AVCaptureExposureMode.ContinuousAutoExposure;
-                device.UnlockForConfiguration();
-            }
-            else if (device.IsWhiteBalanceModeSupported(AVCaptureWhiteBalanceMode.ContinuousAutoWhiteBalance))
-            {
-                device.LockForConfiguration(out error);
-                device.WhiteBalanceMode = AVCaptureWhiteBalanceMode.ContinuousAutoWhiteBalance;
-                device.UnlockForConfiguration();
-            }
-        }
-
-        async void AuthorizeCameraUse()
-        {
-            var authorizationStatus = AVCaptureDevice.GetAuthorizationStatus(AVMediaType.Video);
-            if (authorizationStatus != AVAuthorizationStatus.Authorized)
-            {
-                await AVCaptureDevice.RequestAccessForMediaTypeAsync(AVMediaType.Video);
-            }
+            base.DidReceiveMemoryWarning();
+            // Release any cached data, images, etc that aren't in use.
         }
     }
 }
