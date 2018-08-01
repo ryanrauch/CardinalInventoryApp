@@ -23,15 +23,13 @@
 	<key>MinimumOSVersion</key>
 	<string>11.4</string>
 	<key>CFBundleDisplayName</key>
-	<string>CardinalInventoryApp</string>
+	<string>Cardinal Inventory</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.ryanrauch.cardinal.inventory</string>
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
-	<key>XSAppIconAssets</key>
-	<string>Assets.xcassets/AppIcon.appiconset</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>highlandgothiclightflf.ttf</string>
@@ -40,7 +38,9 @@
 	</array>
 	<key>CFBundleName</key>
 	<string>Cardinal Inventory</string>
-  <key>NSCameraUsageDescription</key>
+	<key>NSCameraUsageDescription</key>
 	<string>to scan barcodes</string>
+	<key>XSAppIconAssets</key>
+	<string>Resources/Assets.xcassets/AppIcons.appiconset</string>
 </dict>
 </plist>

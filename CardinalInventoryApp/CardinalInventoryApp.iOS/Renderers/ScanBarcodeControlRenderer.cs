@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AVFoundation;
+using CardinalInventoryApp.Controls;
 using CardinalInventoryApp.iOS.Renderers;
 using CardinalInventoryApp.iOS.ScanBarcode;
 using CardinalInventoryApp.Views.ContentPages;
+using CoreAnimation;
 using CoreGraphics;
 using CoreVideo;
 using Foundation;
@@ -14,10 +16,10 @@ using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
 
 
-[assembly: ExportRenderer(typeof(ScanBarcodeView), typeof(ScanBarcodeViewBaseRenderer))]
+[assembly: ExportRenderer(typeof(ScanBarcodeControl), typeof(ScanBarcodeControlRenderer))]
 namespace CardinalInventoryApp.iOS.Renderers
 {
-    public class ScanBarcodeViewBaseRenderer : PageRenderer
+    public class ScanBarcodeControlRenderer : ViewRenderer<ScanBarcodeControl, UIView>
     {
         VideoCapture captureController;
         VideoCaptureDelegate captureDelegate;
@@ -34,22 +36,33 @@ namespace CardinalInventoryApp.iOS.Renderers
         UIImageView bufferImageView = new UIImageView();
         UIButton resetButton;
 
-        protected override void OnElementChanged(VisualElementChangedEventArgs e)
+        UIView nativeView;
+
+        protected override void OnElementChanged(ElementChangedEventArgs<ScanBarcodeControl> e)
         {
             base.OnElementChanged(e);
+
+            if(Control == null)
+            {
+                nativeView = new UIView();
+                SetNativeControl(nativeView);
+            }
+            if(e.NewElement != null)
+            {
+
+            }
         }
 
-        public override void ViewDidLoad()
+        private void SetupNativeView()
         {
-            base.ViewDidLoad();
             previewView = new UIView();
-            previewView.Frame = View.Bounds;
-            View.AddSubview(previewView);
+            previewView.Frame = nativeView.Bounds;
+            nativeView.AddSubview(previewView);
 
-            ConfigureBlurViews(View);
-            View.AddSubview(ConfigureResetButton());
-            View.AddSubview(ConfigureOverlay(topBlurView, bottomBlurView));
-            View.AddSubview(ConfigureBufferImageView());
+            ConfigureBlurViews(nativeView);
+            nativeView.AddSubview(ConfigureResetButton());
+            nativeView.AddSubview(ConfigureOverlay(topBlurView, bottomBlurView));
+            nativeView.AddSubview(ConfigureBufferImageView());
 
             ConfigureInitialVisionTask();
 
@@ -82,7 +95,7 @@ namespace CardinalInventoryApp.iOS.Renderers
             resetButton.Hidden = true;
             resetButton.TouchDown += ResetTracking;
             resetButton.TranslatesAutoresizingMaskIntoConstraints = false;
-            resetButton.Frame = new CGRect(View.Frame.Right - 180, 40, 150, 50);
+            resetButton.Frame = new CGRect(nativeView.Frame.Right - 180, 40, 150, 50);
             return resetButton;
         }
 
@@ -164,22 +177,33 @@ namespace CardinalInventoryApp.iOS.Renderers
             }
         }
 
-        public override void ViewDidLayoutSubviews()
+        public override void LayoutSubviews()
         {
-            base.ViewDidLayoutSubviews();
+            base.LayoutSubviews();
             previewLayer.Frame = previewView.Bounds;
-
             var oneFifthHeight = previewLayer.Frame.Height / 5;
             topBlurView.Frame = new CGRect(previewLayer.Frame.Left, previewLayer.Frame.Top, previewLayer.Frame.Right, oneFifthHeight);
             bottomBlurView.Frame = new CGRect(previewLayer.Frame.Left, previewLayer.Frame.Bottom - oneFifthHeight, previewLayer.Frame.Right, oneFifthHeight);
             overlay.Frame = new CGRect(topBlurView.Frame.Left, topBlurView.Frame.Bottom, topBlurView.Frame.Right, bottomBlurView.Frame.Top - topBlurView.Frame.Bottom);
-            resetButton.Frame = new CGRect(View.Frame.Right - 180, 40, 150, 50);
+            resetButton.Frame = new CGRect(nativeView.Frame.Right - 180, 40, 150, 50);
         }
 
-        public override void DidReceiveMemoryWarning()
-        {
-            base.DidReceiveMemoryWarning();
-            // Release any cached data, images, etc that aren't in use.
-        }
+        //public override void ViewDidLayoutSubviews()
+        //{
+        //    base.ViewDidLayoutSubviews();
+        //    previewLayer.Frame = previewView.Bounds;
+
+        //    var oneFifthHeight = previewLayer.Frame.Height / 5;
+        //    topBlurView.Frame = new CGRect(previewLayer.Frame.Left, previewLayer.Frame.Top, previewLayer.Frame.Right, oneFifthHeight);
+        //    bottomBlurView.Frame = new CGRect(previewLayer.Frame.Left, previewLayer.Frame.Bottom - oneFifthHeight, previewLayer.Frame.Right, oneFifthHeight);
+        //    overlay.Frame = new CGRect(topBlurView.Frame.Left, topBlurView.Frame.Bottom, topBlurView.Frame.Right, bottomBlurView.Frame.Top - topBlurView.Frame.Bottom);
+        //    resetButton.Frame = new CGRect(View.Frame.Right - 180, 40, 150, 50);
+        //}
+
+        //public override void DidReceiveMemoryWarning()
+        //{
+        //    base.DidReceiveMemoryWarning();
+        //    // Release any cached data, images, etc that aren't in use.
+        //}
     }
 }

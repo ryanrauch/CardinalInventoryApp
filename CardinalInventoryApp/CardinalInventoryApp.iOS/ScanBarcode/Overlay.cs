@@ -7,6 +7,17 @@ namespace CardinalInventoryApp.iOS.ScanBarcode
 {
     public class Overlay : UIView
     {
+        private string _currentStockItem { get; set; } = string.Empty;
+        public string CurrentStockItem
+        {
+            get => _currentStockItem;
+            set
+            {
+                _currentStockItem = value;
+                SetNeedsDisplay();
+            }
+        }
+
         List<CGPoint[]> quadrilaterals = new List<CGPoint[]>();
 
         public override void Draw(CGRect rect)
@@ -41,6 +52,17 @@ namespace CardinalInventoryApp.iOS.ScanBarcode
 
                 //Draw the text at given coords.
                 ctxt.ShowTextAtPoint(25, -50/*-25*/, Message);
+                ctxt.RestoreState();
+
+                //Current StockItem display
+                ctxt.SaveState();
+                ctxt.ScaleCTM(1, -1);
+                ctxt.SetFillColor(UIColor.Red.CGColor);
+                ctxt.SetTextDrawingMode(CGTextDrawingMode.Fill);
+                ctxt.SelectFont("Helvetica", 24, CGTextEncoding.MacRoman);
+
+                //Draw the text at given coords.
+                ctxt.ShowTextAtPoint(100, -25, CurrentStockItem);
                 ctxt.RestoreState();
             }
 
