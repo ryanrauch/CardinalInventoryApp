@@ -4,10 +4,11 @@
                        xmlns:local="clr-namespace:CardinalInventoryApp.Views.ContentPages"
                        x:Class="CardinalInventoryApp.Views.ContentPages.InitialView">
     <ContentPage.Content>
-        <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
+        <StackLayout Orientation="Vertical">
+            <Button Text="ChartView" Command="{Binding ChartViewCommand}"/>
+            <Button Text="ReceiveItemView" Command="{Binding ReceiveItemViewCommand}"/>
+            <Button Text="ScanBarcodeView" Command="{Binding ScanBarcodeViewCommand}"/>
+            <Button Text="InventoryView" Command="{Binding InventoryViewCommand}"/>
         </StackLayout>
     </ContentPage.Content>
 </local:InitialViewBase>

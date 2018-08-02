@@ -17,10 +17,10 @@ namespace CardinalInventoryApp
         {
             InitializeComponent();
             Container = AutoFacContainerBuilder.CreateContainer();
-            //MainPage = new InitialView();
+            MainPage = new InitialView();
             //MainPage = new InventoryView();
             //MainPage = new ChartView();
-            MainPage = new ScanBarcodeView();
+            //MainPage = new ScanBarcodeView();
         }
 
         protected override void OnStart ()
