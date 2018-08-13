@@ -1,6 +1,7 @@
 ﻿using System;
 
 using Foundation;
+using HealthKit;
 using WatchKit;
 
 namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
@@ -27,6 +28,16 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
             // and it begins the transition to the background state.
             // Use this method to pause ongoing tasks, disable timers, etc.
         }
+
+        //public override void HandleWorkoutConfiguration(HKWorkoutConfiguration workoutConfiguration)
+        //{
+        //    base.HandleWorkoutConfiguration(workoutConfiguration);
+        //    WKInterfaceController.ReloadRootPageControllers(new string[] { nameof(InterfaceController) },
+        //                                        new NSObject[] { workoutConfiguration },
+        //                                        WKPageOrientation.Vertical,
+        //                                        0);
+        //}
+
     }
 }
 

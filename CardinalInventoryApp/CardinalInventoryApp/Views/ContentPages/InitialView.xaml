@@ -2,10 +2,14 @@
 <local:InitialViewBase xmlns="http://xamarin.com/schemas/2014/forms"
                        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                        xmlns:local="clr-namespace:CardinalInventoryApp.Views.ContentPages"
+                       xmlns:exs="clr-namespace:CardinalInventoryApp.Extensions"
                        x:Class="CardinalInventoryApp.Views.ContentPages.InitialView">
     <ContentPage.Content>
-        <StackLayout Orientation="Vertical">
-            <Button Text="ChartView" Command="{Binding ChartViewCommand}"/>
+        <StackLayout Orientation="Vertical" Margin="0,25,0,0">
+            <Image Aspect="AspectFit"
+                   Source="{exs:ImageResource CardinalInventoryApp.Images.cardinalheader.png}"/>
+            <Button Text="SmartWatchView" Command="{Binding SmartWatchViewCommand}"/>
+            <Button Text="DirectionalView" Command="{Binding DirectionalViewCommand}"/>
             <Button Text="ReceiveItemView" Command="{Binding ReceiveItemViewCommand}"/>
             <Button Text="ScanBarcodeView" Command="{Binding ScanBarcodeViewCommand}"/>
             <Button Text="InventoryView" Command="{Binding InventoryViewCommand}"/>

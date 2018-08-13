@@ -18,7 +18,7 @@ namespace CardinalInventoryApp
             containerBuilder.RegisterType<LoginViewModel>().SingleInstance();
             containerBuilder.RegisterType<InventoryViewModel>().SingleInstance();
             containerBuilder.RegisterType<InventoryCompletedViewModel>().SingleInstance();
-            containerBuilder.RegisterType<ChartViewModel>().SingleInstance();
+            containerBuilder.RegisterType<SmartWatchViewModel>().SingleInstance();
             containerBuilder.RegisterType<ScanBarcodeViewModel>().SingleInstance();
             containerBuilder.RegisterType<ReceiveItemViewModel>().SingleInstance();
 

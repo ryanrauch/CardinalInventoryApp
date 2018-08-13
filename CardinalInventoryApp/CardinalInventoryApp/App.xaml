@@ -192,6 +192,13 @@
                         Value="{StaticResource CardinalBackgroundLightColor}"/>
             </Style>
 
+            <!--Default Button Style-->
+            <Style TargetType="{x:Type Button}"
+                   BasedOn="{StaticResource CardinalItemButtonStyle}">
+                <Setter Property="CornerRadius"
+                        Value="5"/>
+            </Style>
+
             <!--ContentPageGrid-Style-->
             <Style x:Key="GridContentPageStyle"
                    TargetType="{x:Type Grid}">

@@ -3,23 +3,69 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using CardinalInventoryApp.Services.Interfaces;
 using CardinalInventoryApp.ViewModels.Base;
+using Xamarin.Forms;
 
 namespace CardinalInventoryApp.ViewModels
 {
-    public class ChartViewModel : ViewModelBase
+    public class SmartWatchViewModel : ViewModelBase
     {
         private readonly IRequestService _requestService;
         private readonly IWatchSessionManager _watchSessionManager;
+        private const int DISPLAYROWCOUNT = 14;
+        private const double RADIANSTODEGREES = 180 / Math.PI;
 
-        public ChartViewModel(
+        public SmartWatchViewModel(
             IRequestService requestService,
             IWatchSessionManager watchSessionManager)
         {
+            ClearData();
             _requestService = requestService;
             _watchSessionManager = watchSessionManager;
             _watchSessionManager.DataReceived += _watchSessionManager_DataReceived;
+        }
+
+        public ICommand ClearDataCommand => new Command(ClearData);
+        public ICommand SaveDataCommand => new Command(async () => await SaveDataAsync());
+
+        private void ClearData()
+        {
+            GyroList = new ObservableCollection<string>();
+            AccelList = new ObservableCollection<string>();
+            DeviceMotionList = new ObservableCollection<string>();
+            DeviceMotionAttitudeList = new ObservableCollection<string>();
+            DeviceMotionAccelList = new ObservableCollection<string>();
+            WristLocationString = string.Empty;
+            CurrentAttitudeRoll = 0.0d;
+        }
+
+        private async Task SaveDataAsync()
+        {
+            await Task.Delay(10);
+        }
+
+        private double _currentAttitudeRoll { get; set; } // Degrees (0-360)
+        public double CurrentAttitudeRoll 
+        {
+            get { return _currentAttitudeRoll; }
+            set
+            {
+                _currentAttitudeRoll = value;
+                RaisePropertyChanged(() => CurrentAttitudeRoll);
+            }
+        }
+
+        private string _wristLocationString { get; set; }
+        public string WristLocationString
+        {
+            get { return _wristLocationString; }
+            set
+            {
+                _wristLocationString = value;
+                RaisePropertyChanged(() => WristLocationString);
+            }
         }
 
         private ObservableCollection<string> _gyroList { get; set; }
@@ -78,45 +124,48 @@ namespace CardinalInventoryApp.ViewModels
         }
         private void _watchSessionManager_DataReceived(object sender, WatchDataEventArgs e)
         {
-            int rowCount = 14;
             Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
             {
                 switch (e.WatchDataType)
                 {
                     case WatchDataType.GyroData:
                         GyroList.Add(e.Data);
-                        if(GyroList.Count > rowCount)
+                        if(GyroList.Count > DISPLAYROWCOUNT)
                         {
                             GyroList.RemoveAt(0);
                         }
                         break;
                     case WatchDataType.AccelData:
                         AccelList.Add(e.Data);
-                        if(AccelList.Count > rowCount)
+                        if(AccelList.Count > DISPLAYROWCOUNT)
                         {
                             AccelList.RemoveAt(0);
                         }
                         break;
                     case WatchDataType.DeviceMotionRotationRateData:
                         DeviceMotionList.Add(e.Data);
-                        if(DeviceMotionList.Count > rowCount)
+                        if(DeviceMotionList.Count > DISPLAYROWCOUNT)
                         {
                             DeviceMotionList.RemoveAt(0);
                         }
                         break;
                     case WatchDataType.DeviceMotionAttitudeData:
+                        SetCurrentAttitudeRoll(e.Data);
                         DeviceMotionAttitudeList.Add(e.Data);
-                        if (DeviceMotionAttitudeList.Count > rowCount)
+                        if (DeviceMotionAttitudeList.Count > DISPLAYROWCOUNT)
                         {
                             DeviceMotionAttitudeList.RemoveAt(0);
                         }
                         break;
                     case WatchDataType.DeviveMotionAccelData:
                         DeviceMotionAccelList.Add(e.Data);
-                        if (DeviceMotionAccelList.Count > rowCount)
+                        if (DeviceMotionAccelList.Count > DISPLAYROWCOUNT)
                         {
                             DeviceMotionAccelList.RemoveAt(0);
                         }
+                        break;
+                    case WatchDataType.WristLocationData:
+                        WristLocationString = e.Data;
                         break;
                     default:
                         break;
@@ -124,13 +173,21 @@ namespace CardinalInventoryApp.ViewModels
             });
         }
 
+        private void SetCurrentAttitudeRoll(string data)
+        {
+            if(data.Contains(":"))
+            {
+                var spl = data.Split(':');
+                if(spl.Count() > 1)
+                {
+                    var roll = Convert.ToDouble(spl[1]);
+                    CurrentAttitudeRoll = roll * RADIANSTODEGREES;
+                }
+            }
+        }
+
         public override Task OnAppearingAsync()
         {
-            GyroList = new ObservableCollection<string>();
-            AccelList = new ObservableCollection<string>();
-            DeviceMotionList = new ObservableCollection<string>();
-            DeviceMotionAttitudeList = new ObservableCollection<string>();
-            DeviceMotionAccelList = new ObservableCollection<string>();
             _watchSessionManager.StartSession();
             return Task.CompletedTask;
         }

@@ -132,7 +132,6 @@
     <BundleResource Include="Resources\fa-solid-900.ttf" />
     <BundleResource Include="Resources\highlandgothiclightflf.ttf" />
     <BundleResource Include="Resources\fa-regular-400.ttf" />
-    <Compile Include="Renderers\ChartViewBaseRenderer.cs" />
     <Compile Include="DependencyServices\WCSessionManager.cs" />
   </ItemGroup>
   <ItemGroup>

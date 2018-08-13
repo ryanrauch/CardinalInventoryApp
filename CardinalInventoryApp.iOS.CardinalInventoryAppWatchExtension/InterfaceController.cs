@@ -1,5 +1,4 @@
 ﻿using System;
-
 using WatchKit;
 using Foundation;
 using CoreMotion;
@@ -8,7 +7,7 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
 {
     public partial class InterfaceController : WKInterfaceController
     {
-        const double _updateInterval = 0.25d;
+        const double _updateInterval = 0.10d;
         WCSessionManager _sessionManager;
         CMMotionManager _motionManager;
 

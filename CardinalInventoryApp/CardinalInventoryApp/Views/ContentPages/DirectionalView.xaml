@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<local:DirectionalViewBase xmlns="http://xamarin.com/schemas/2014/forms"
+                           xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                           xmlns:local="clr-namespace:CardinalInventoryApp.Views.ContentPages"
+                           xmlns:exs ="clr-namespace:CardinalInventoryApp.Extensions"
+                           x:Class="CardinalInventoryApp.Views.ContentPages.DirectionalView">
+    <ContentPage.Content>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="80"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="80"/>
+            </Grid.RowDefinitions>
+
+            <Image Grid.Row="1"
+                   Aspect="AspectFit"
+                   Source="{exs:ImageResource CardinalInventoryApp.Images.cardinalbaselayer.png}"/>
+            <Image Grid.Row="1"
+                   Aspect="AspectFit"
+                   Rotation="{Binding CurrentAttitudeRoll}"
+                   Source="{exs:ImageResource CardinalInventoryApp.Images.cardinaldirectionlayer.png}"/>
+        </Grid>
+    </ContentPage.Content>
+</local:DirectionalViewBase>

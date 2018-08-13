@@ -4,12 +4,12 @@ using Xamarin.Forms.Xaml;
 
 namespace CardinalInventoryApp.Views.ContentPages
 {
-    public class ChartViewBase : ViewPageBase<ChartViewModel> { }
+    public class DirectionalViewBase : ViewPageBase<SmartWatchViewModel> { }
 
 	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class ChartView : ChartViewBase
+	public partial class DirectionalView : DirectionalViewBase
 	{
-		public ChartView ()
+		public DirectionalView ()
 		{
 			InitializeComponent ();
 		}
