@@ -196,7 +196,7 @@
             <Style TargetType="{x:Type Button}"
                    BasedOn="{StaticResource CardinalItemButtonStyle}">
                 <Setter Property="CornerRadius"
-                        Value="5"/>
+                        Value="10"/>
             </Style>
 
             <!--ContentPageGrid-Style-->

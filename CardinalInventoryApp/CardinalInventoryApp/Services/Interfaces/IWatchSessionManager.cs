@@ -20,8 +20,8 @@ namespace CardinalInventoryApp.Services.Interfaces
         AccelData,
         DeviceMotionRotationRateData,
         DeviceMotionAttitudeData,
-        DeviveMotionAccelData,
-        WristLocationData
+        DeviceMotionAccelData,
+        InitializationData
     };
 
     public class WatchDataEventArgs : EventArgs
@@ -54,13 +54,13 @@ namespace CardinalInventoryApp.Services.Interfaces
             {
                 WatchDataType = WatchDataType.DeviceMotionAttitudeData;
             }
-            else if (wdt.Equals(WatchDataType.DeviveMotionAccelData.ToString()))
+            else if (wdt.Equals(WatchDataType.DeviceMotionAccelData.ToString()))
             {
-                WatchDataType = WatchDataType.DeviveMotionAccelData;
+                WatchDataType = WatchDataType.DeviceMotionAccelData;
             }
-            else if(wdt.Equals(WatchDataType.WristLocationData.ToString()))
+            else if(wdt.Equals(WatchDataType.InitializationData.ToString()))
             {
-                WatchDataType = WatchDataType.WristLocationData;
+                WatchDataType = WatchDataType.InitializationData;
             }
         }
     }

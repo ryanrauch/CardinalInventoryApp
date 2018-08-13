@@ -14,7 +14,8 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
         AccelData,
         DeviceMotionRotationRateData,
         DeviceMotionAttitudeData,
-        DeviveMotionAccelData
+        DeviceMotionAccelData,
+        InitializationData
     };
 
     public class WatchDataEventArgs : EventArgs
@@ -47,9 +48,13 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
             {
                 WatchDataType = WatchDataType.DeviceMotionAttitudeData;
             }
-            else if (wdt.Equals(WatchDataType.DeviveMotionAccelData.ToString()))
+            else if (wdt.Equals(WatchDataType.DeviceMotionAccelData.ToString()))
             {
-                WatchDataType = WatchDataType.DeviveMotionAccelData;
+                WatchDataType = WatchDataType.DeviceMotionAccelData;
+            }
+            else if (wdt.Equals(WatchDataType.InitializationData.ToString()))
+            {
+                WatchDataType = WatchDataType.InitializationData;
             }
         }
     }

@@ -14,6 +14,14 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
         partial void OnButtonPress()
         {
             WKExtension.SharedExtension.Autorotating = !WKExtension.SharedExtension.Autorotating;
+            if(WKExtension.SharedExtension.Autorotating)
+            {
+                myButton.SetTitle("Stop");
+            }
+            else
+            {
+                myButton.SetTitle("Start");
+            }
         }
 
         protected InterfaceController(IntPtr handle) : base(handle)
@@ -41,6 +49,10 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
         {
             // This method is called when the watch view controller is about to be visible to the user.
             Console.WriteLine("{0} will activate", this);
+            string initData = string.Format("{0}:{1}", 
+                                            _updateInterval,
+                                            WKInterfaceDevice.CurrentDevice.WristLocation.ToString());
+            _sessionManager.SendData(WatchDataType.InitializationData, initData);
             if (_motionManager.AccelerometerAvailable)
             {
                 Console.WriteLine("AccelerometerAvailable");
@@ -64,12 +76,12 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
                 {
                     _sessionManager.SendData(WatchDataType.DeviceMotionRotationRateData, data.RotationRate.x, data.RotationRate.y, data.RotationRate.z);
                     _sessionManager.SendData(WatchDataType.DeviceMotionAttitudeData, data.Attitude.Pitch, data.Attitude.Roll, data.Attitude.Yaw);
-                    _sessionManager.SendData(WatchDataType.DeviveMotionAccelData, data.UserAcceleration.X, data.UserAcceleration.Y, data.UserAcceleration.Z);
+                    _sessionManager.SendData(WatchDataType.DeviceMotionAccelData, data.UserAcceleration.X, data.UserAcceleration.Y, data.UserAcceleration.Z);
                     myLabel.SetText(string.Format("X{0} Y{1} Z{2}", data.UserAcceleration.X, data.UserAcceleration.Y, data.UserAcceleration.Z));
                 });
             }
         }
-
+        
         public override void DidDeactivate()
         {
             // This method is called when the watch view controller is no longer visible to the user.

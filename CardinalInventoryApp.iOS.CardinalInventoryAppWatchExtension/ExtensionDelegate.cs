@@ -1,7 +1,6 @@
 ﻿using System;
 
 using Foundation;
-using HealthKit;
 using WatchKit;
 
 namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension

@@ -38,17 +38,21 @@
     </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodesignKey>iPhone Developer: Ryan Rauch (5R3938P9XH)</CodesignKey>
+    <CodesignKey>iPhone Developer</CodesignKey>
     <MtouchUseLlvm>true</MtouchUseLlvm>
     <MtouchFloat32>true</MtouchFloat32>
     <MtouchEnableBitcode>true</MtouchEnableBitcode>
-    <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
+    <CodesignEntitlements>
+    </CodesignEntitlements>
     <MtouchLink>SdkOnly</MtouchLink>
     <MtouchArch>ARMv7k</MtouchArch>
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
     <MtouchVerbosity>
     </MtouchVerbosity>
-    <CodesignProvision>VS: com.ryanrauch.cardinal.inventory.watchkitapp.watchkitextension Development</CodesignProvision>
+    <CodesignProvision>
+    </CodesignProvision>
+    <CodesignExtraArgs />
+    <CodesignResourceRules />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhoneSimulator' ">
     <DebugType>pdbonly</DebugType>
@@ -82,7 +86,8 @@
     <IOSDebugOverWiFi>true</IOSDebugOverWiFi>
     <MtouchFastDev>true</MtouchFastDev>
     <MtouchFloat32>true</MtouchFloat32>
-    <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
+    <CodesignEntitlements>
+    </CodesignEntitlements>
     <IOSDebuggerPort>31033</IOSDebuggerPort>
     <MtouchLink>SdkOnly</MtouchLink>
     <MtouchArch>ARMv7k</MtouchArch>
@@ -90,6 +95,8 @@
     <MtouchVerbosity>
     </MtouchVerbosity>
     <CodesignProvision>VS: com.ryanrauch.cardinal.inventory.watchkitapp.watchkitextension Development</CodesignProvision>
+    <CodesignExtraArgs />
+    <CodesignResourceRules />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -120,10 +127,6 @@
     <Compile Include="InterfaceController.cs" />
     <Compile Include="InterfaceController.designer.cs">
       <DependentUpon>InterfaceController.cs</DependentUpon>
-    </Compile>
-    <Compile Include="NotificationController.cs" />
-    <Compile Include="NotificationController.designer.cs">
-      <DependentUpon>NotificationController.cs</DependentUpon>
     </Compile>
     <Compile Include="WCSessionManager.cs" />
   </ItemGroup>

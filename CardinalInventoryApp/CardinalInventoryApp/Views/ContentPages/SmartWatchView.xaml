@@ -2,24 +2,22 @@
 <local:SmartWatchViewBase xmlns="http://xamarin.com/schemas/2014/forms"
                      xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                      xmlns:local="clr-namespace:CardinalInventoryApp.Views.ContentPages"
-                     xmlns:exs="clr-namespace:CardinalInventoryApp.Extensions"
                      x:Class="CardinalInventoryApp.Views.ContentPages.SmartWatchView">
     <ContentPage.Content>
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="80"/>
+                <RowDefinition Height="50"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="80"/>
+                <RowDefinition Height="50"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Image Grid.Row="0" 
+            <Label Grid.Row="0"
                    Grid.Column="0"
-                   Aspect="AspectFit"
-                   Source="{exs:ImageResource CardinalInventoryApp.Images.cardinalheader.png}"/>
+                   Text="{Binding SelectedPourSpoutDescription}"/>
             <Label Grid.Row="0"
                    Grid.Column="1"
                    Text="{Binding WristLocationString}"/>
@@ -70,12 +68,16 @@
 
             <Button Grid.Row="3"
                     Grid.Column="0"
+                    Margin="10,10,10,10"
                     Text="Clear Data"
+                    IsEnabled="{Binding SaveDataEnabled}"
                     Command="{Binding ClearDataCommand}"/>
 
             <Button Grid.Row="3"
                     Grid.Column="1"
+                    Margin="10,10,10,10"
                     Text="Save Data"
+                    IsEnabled="{Binding SaveDataEnabled}"
                     Command="{Binding SaveDataCommand}"/>
         </Grid>
     </ContentPage.Content>
