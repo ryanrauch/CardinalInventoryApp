@@ -9,8 +9,9 @@
                 <RowDefinition Height="25"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="25"/>
                 <RowDefinition Height="50"/>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="25"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -66,25 +67,31 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <Label Grid.Row="3"
-                   Grid.Column="0"
-                   Text="{Binding CurrentAttitudeRollString}"/>
-            <Label Grid.Row="3"
-                   Grid.Column="1"
-                   Text="{Binding MeasuredPourLengthString}"/>
-            <Button Grid.Row="4"
+            <Button Grid.Row="3"
                     Grid.Column="0"
                     Margin="10,10,10,10"
                     Text="Clear Data"
                     IsEnabled="{Binding SaveDataEnabled}"
                     Command="{Binding ClearDataCommand}"/>
-
-            <Button Grid.Row="4"
+            <Button Grid.Row="3"
                     Grid.Column="1"
                     Margin="10,10,10,10"
                     Text="Save Data"
                     IsEnabled="{Binding SaveDataEnabled}"
                     Command="{Binding SaveDataCommand}"/>
+            
+            <Label Grid.Row="4"
+                   Grid.Column="0"
+                   Text="{Binding CurrentAttitudeRollString}"/>
+            <Label Grid.Row="4"
+                   Grid.Column="1"
+                   Text="{Binding MeasuredPourLengthString}"/>
+            <Label Grid.Row="5"
+                   Grid.Column="0"
+                   Text="{Binding MeasuredPourVolumeString}"/>
+            <Label Grid.Row="5"
+                   Grid.Column="1"
+                   Text="{Binding MeasuredPourVolumeOzString}"/>            
         </Grid>
     </ContentPage.Content>
 </local:SmartWatchViewBase>

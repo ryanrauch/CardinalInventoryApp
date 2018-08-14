@@ -1,4 +1,4 @@
-// WARNING
+﻿// WARNING
 //
 // This file has been generated automatically by Visual Studio from the outlets and
 // actions declared in your storyboard file.
@@ -15,23 +15,10 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
     {
         [Outlet]
         [GeneratedCode ("iOS Designer", "1.0")]
-        WatchKit.WKInterfaceButton myButton { get; set; }
-
-        [Outlet]
-        [GeneratedCode ("iOS Designer", "1.0")]
         WatchKit.WKInterfaceLabel myLabel { get; set; }
-
-        [Action ("OnButtonPress")]
-        [GeneratedCode ("iOS Designer", "1.0")]
-        partial void OnButtonPress ();
 
         void ReleaseDesignerOutlets ()
         {
-            if (myButton != null) {
-                myButton.Dispose ();
-                myButton = null;
-            }
-
             if (myLabel != null) {
                 myLabel.Dispose ();
                 myLabel = null;

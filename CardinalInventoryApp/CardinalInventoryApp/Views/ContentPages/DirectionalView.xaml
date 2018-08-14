@@ -7,18 +7,89 @@
     <ContentPage.Content>
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="80"/>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="80"/>
+                <RowDefinition Height="120"/>
             </Grid.RowDefinitions>
 
-            <Image Grid.Row="1"
+            <Image Grid.Row="0"
                    Aspect="AspectFit"
                    Source="{exs:ImageResource CardinalInventoryApp.Images.cardinalbaselayer.png}"/>
-            <Image Grid.Row="1"
+            <Image Grid.Row="0"
                    Aspect="AspectFit"
-                   Rotation="{Binding CurrentAttitudeRoll}"
+                   Rotation="{Binding CurrentAttitudeYaw}"
+                   RotationX="{Binding CurrentAttitudePitch}"
+                   RotationY="{Binding CurrentAttitudeRoll}"
                    Source="{exs:ImageResource CardinalInventoryApp.Images.cardinaldirectionlayer.png}"/>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0"
+                       Grid.Column="0"
+                       Text="Pitch"/>
+                <Label Grid.Row="0"
+                       Grid.Column="1"
+                       Text="Roll"/>
+                <Label Grid.Row="0"
+                       Grid.Column="2"
+                       Text="Yaw"/>
+
+                <Label Grid.Row="1"
+                       Grid.Column="0"
+                       Text="{Binding CurrentAttitudePitch}"/>
+                <Label Grid.Row="1"
+                       Grid.Column="1"
+                       Text="{Binding CurrentAttitudeRoll}"/>
+                <Label Grid.Row="1"
+                       Grid.Column="2"
+                       Text="{Binding CurrentAttitudeYaw}"/>
+
+                <Label Grid.Row="2"
+                       Grid.Column="0"
+                       Text="Time (sec)"/>
+                <Label Grid.Row="2"
+                       Grid.Column="1"
+                       Text="Vol. (mL)"/>
+                <Label Grid.Row="2"
+                       Grid.Column="2"
+                       Text="Vol. (oz)"/>
+
+                <Label Grid.Row="3"
+                       Grid.Column="0"
+                       Text="{Binding MeasuredPourLengthString}"/>
+                <Label Grid.Row="3"
+                       Grid.Column="1"
+                       Text="{Binding MeasuredPourVolumeString}"/>
+                <Label Grid.Row="3"
+                       Grid.Column="2"
+                       Text="{Binding MeasuredPourVolumeOzString}"/>
+
+                <Label Grid.Row="4"
+                       Grid.Column="0"
+                       Grid.ColumnSpan="2"
+                       Text="Pour Spout"/>
+                <Label Grid.Row="4"
+                       Grid.Column="2"
+                       Text="Wrist"/>
+                <Label Grid.Row="5"
+                       Grid.Column="0"
+                       Grid.ColumnSpan="2"
+                       Text="{Binding SelectedPourSpoutDescription}"/>
+                <Label Grid.Row="5"
+                       Grid.Column="2"
+                       Text="{Binding WristLocationString}"/>
+            </Grid>
         </Grid>
     </ContentPage.Content>
 </local:DirectionalViewBase>

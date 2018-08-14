@@ -89,9 +89,16 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
             _session = null;
         }
 
+        private long DateTimeToUnixMilliseconds(DateTime dt)
+        {
+            //return dt.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
+            return new DateTimeOffset(dt.ToUniversalTime()).ToUnixTimeMilliseconds();
+        }
+
         public void SendData(WatchDataType type, double x, double y, double z)
         {
-            string data = string.Format("{0:0.000}:{1:0.000}:{2:0.000}", x, y, z);
+            //string data = string.Format("{0:0.000}:{1:0.000}:{2:0.000}:{3}", x, y, z, DateTimeToUnixMilliseconds(DateTime.Now));
+            string data = string.Format("{0:0.##}:{1:0.##}:{2:0.##}:{3}", x, y, z, DateTimeToUnixMilliseconds(DateTime.Now));
             SendData(type, data);
         }
 

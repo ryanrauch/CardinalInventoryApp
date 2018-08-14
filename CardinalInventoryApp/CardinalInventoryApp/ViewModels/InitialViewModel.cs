@@ -20,7 +20,7 @@ namespace CardinalInventoryApp.ViewModels
             _navigationService = navigationService;
         }
 
-        public ICommand SmartWatchViewCommand => new Command(() => _navigationService.NavigatePushAsync(new SmartWatchView()));
+        public ICommand SmartWatchViewCommand => new Command(() => _navigationService.NavigatePushAsync(new SmartWatchView(), true));
         public ICommand SmartWatchSessionDataViewCommand => new Command(() => _navigationService.NavigatePushAsync(new SmartWatchSessionDataView()));
         public ICommand DirectionalViewCommand => new Command(() => _navigationService.NavigatePushAsync(new DirectionalView()));
         public ICommand ReceiveItemViewCommand => new Command(() => _navigationService.NavigatePushAsync(new ReceiveItemView()));

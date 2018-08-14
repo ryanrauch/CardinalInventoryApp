@@ -15,29 +15,47 @@ namespace CardinalInventoryApp.ViewModels
     {
         private readonly IRequestService _requestService;
         private readonly IWatchSessionManager _watchSessionManager;
-        private const int DISPLAYROWCOUNT = 14;
+        private const int DISPLAYROWCOUNT = 12;
         private const double RADIANSTODEGREES = 180 / Math.PI;
+        private const double MILLILITERTOOUNCE = 0.033814;
 
         private const double ROLLSTART = 80;
         private const double ROLLSTOP = 10;
+        private const double PITCHSTART = 20;
+        private const double PITCHSTOP = 0;
+
         private int _pourStartInterval { get; set; }
+        private UInt64 _pourStartUnixTime { get; set; }
         private bool _isPouring { get; set; }
+
+        private bool _debugMode { get; set; }
 
         public SmartWatchViewModel(
             IRequestService requestService,
             IWatchSessionManager watchSessionManager)
         {
+            _debugMode = false;
             _initialAttitudeRoll = Double.MinValue;
             _updateIntervalSeconds = 0.0d;
             WristLocationString = string.Empty;
             _isPouring = false;
             _pourStartInterval = 0;
+            _pourStartUnixTime = 0;
             PourSpouts = new ObservableCollection<PourSpout>();
 
             ClearData();
             _requestService = requestService;
             _watchSessionManager = watchSessionManager;
             _watchSessionManager.DataReceived += _watchSessionManager_DataReceived;
+        }
+
+        public override void Initialize(object param)
+        {
+            base.Initialize(param);
+            if(param is bool b)
+            {
+                _debugMode = b;
+            }
         }
 
         public ICommand ClearDataCommand => new Command(ClearData);
@@ -61,10 +79,15 @@ namespace CardinalInventoryApp.ViewModels
             DeviceMotionAccelList = new ObservableCollection<string>();
             CurrentAttitudeRoll = 0.0d;
             MeasuredPourLength = 0.0d;
+            _pourStartUnixTime = 0;
         }
 
         private async Task SaveDataAsync()
         {
+            if(!_debugMode)
+            {
+                return;
+            }
             IsBusy = true;
             var session = new SmartWatchSession()
             {
@@ -72,7 +95,7 @@ namespace CardinalInventoryApp.ViewModels
                 Description = "SmartWatchViewModel",
                 IntervalDuration = Convert.ToDecimal(_updateIntervalSeconds),
                 AttitudeRollOffset = _initialAttitudeRoll,
-                Timestamp = DateTime.Now,
+                Timestamp = DateTime.Now.ToUniversalTime(),
                 IntervalStart = 0,
                 IntervalStop = 0
             };
@@ -103,11 +126,12 @@ namespace CardinalInventoryApp.ViewModels
                 if(_deviceMotionAttitudeListFull[i].Contains(":"))
                 {
                     var splAttitude = _deviceMotionAttitudeListFull[i].Split(':');
-                    if (splAttitude.Count() > 2)
+                    if (splAttitude.Count() > 3)
                     {
                         data.AttitudePitch = Convert.ToDouble(splAttitude[0]);
                         data.AttitudeRoll = Convert.ToDouble(splAttitude[1]);
                         data.AttitudeYaw = Convert.ToDouble(splAttitude[2]);
+                        data.TimestampUnixMs = Convert.ToUInt64(splAttitude[3]);
                     }
                 }
                 // RotationRate
@@ -186,6 +210,26 @@ namespace CardinalInventoryApp.ViewModels
             }
         }
 
+        public string MeasuredPourVolumeOzString => MeasuredPourVolumeOz.ToString() + "oz";
+        public double MeasuredPourVolumeOz
+        {
+            get { return MeasuredPourVolume * MILLILITERTOOUNCE; }
+        }
+
+        public string MeasuredPourVolumeString => MeasuredPourVolume.ToString() + "mL";
+        public double MeasuredPourVolume
+        {
+            get
+            {
+                if(SelectedPourSpout == null)
+                {
+                    return 0.0d;
+                }
+                double mlPerSecond = 1000 / SelectedPourSpout.DurationForOneLiter;
+                return MeasuredPourLength * mlPerSecond;
+            }
+        }
+
         public string MeasuredPourLengthString => MeasuredPourLength.ToString() + "sec";
         private double _measuredPourLength { get; set; }
         public double MeasuredPourLength
@@ -196,6 +240,8 @@ namespace CardinalInventoryApp.ViewModels
                 _measuredPourLength = value;
                 RaisePropertyChanged(() => MeasuredPourLength);
                 RaisePropertyChanged(() => MeasuredPourLengthString);
+                RaisePropertyChanged(() => MeasuredPourVolumeString);
+                RaisePropertyChanged(() => MeasuredPourVolumeOzString);
             }
         }
 
@@ -209,6 +255,43 @@ namespace CardinalInventoryApp.ViewModels
                 _currentAttitudeRoll = value;
                 RaisePropertyChanged(() => CurrentAttitudeRoll);
                 RaisePropertyChanged(() => CurrentAttitudeRollString);
+            }
+        }
+
+        public string CurrentAttitudePitchString => CurrentAttitudePitch.ToString();
+        private double _currentAttitudePitch { get; set; } // Degrees (0-360)
+        public double CurrentAttitudePitch
+        {
+            get { return _currentAttitudePitch; }
+            set
+            {
+                _currentAttitudePitch = value;
+                RaisePropertyChanged(() => CurrentAttitudePitch);
+                RaisePropertyChanged(() => CurrentAttitudePitchString);
+            }
+        }
+
+        public string CurrentAttitudeYawString => CurrentAttitudeYaw.ToString();
+        private double _currentAttitudeYaw { get; set; } // Degrees (0-360)
+        public double CurrentAttitudeYaw
+        {
+            get { return _currentAttitudeYaw; }
+            set
+            {
+                _currentAttitudeYaw = value;
+                RaisePropertyChanged(() => CurrentAttitudeYaw);
+                RaisePropertyChanged(() => CurrentAttitudeYawString);
+            }
+        }
+
+        private UInt64 _currentUnixTimestamp { get; set; }
+        public UInt64 CurrentUnixTimestamp
+        {
+            get { return _currentUnixTimestamp; }
+            set
+            {
+                _currentUnixTimestamp = value;
+                RaisePropertyChanged(() => CurrentUnixTimestamp);
             }
         }
 
@@ -289,51 +372,66 @@ namespace CardinalInventoryApp.ViewModels
                 switch (e.WatchDataType)
                 {
                     case WatchDataType.GyroData:
-                        GyroList.Add(e.Data);
-                        _gyroListFull.Add(e.Data);
-                        if(GyroList.Count > DISPLAYROWCOUNT)
+                        if(_debugMode)
                         {
-                            GyroList.RemoveAt(0);
+                            GyroList.Add(e.Data);
+                            _gyroListFull.Add(e.Data);
+                            if (GyroList.Count > DISPLAYROWCOUNT)
+                            {
+                                GyroList.RemoveAt(0);
+                            }
                         }
                         break;
                     case WatchDataType.AccelData:
-                        AccelList.Add(e.Data);
-                        _accelListFull.Add(e.Data);
-                        if(AccelList.Count > DISPLAYROWCOUNT)
+                        if(_debugMode)
                         {
-                            AccelList.RemoveAt(0);
+                            AccelList.Add(e.Data);
+                            _accelListFull.Add(e.Data);
+                            if (AccelList.Count > DISPLAYROWCOUNT)
+                            {
+                                AccelList.RemoveAt(0);
+                            }
                         }
                         break;
                     case WatchDataType.DeviceMotionRotationRateData:
-                        DeviceMotionList.Add(e.Data);
-                        _deviceMotionListFull.Add(e.Data);
-                        if(DeviceMotionList.Count > DISPLAYROWCOUNT)
+                        if(_debugMode)
                         {
-                            DeviceMotionList.RemoveAt(0);
+                            DeviceMotionList.Add(e.Data);
+                            _deviceMotionListFull.Add(e.Data);
+                            if (DeviceMotionList.Count > DISPLAYROWCOUNT)
+                            {
+                                DeviceMotionList.RemoveAt(0);
+                            }
                         }
                         break;
                     case WatchDataType.DeviceMotionAttitudeData:
-                        SetCurrentAttitudeRoll(e.Data);
-                        DeviceMotionAttitudeList.Add(e.Data);
-                        _deviceMotionAttitudeListFull.Add(e.Data);
-                        if (DeviceMotionAttitudeList.Count > DISPLAYROWCOUNT)
+                        SetCurrentAttitude(e.Data);
+                        if(_debugMode)
                         {
-                            DeviceMotionAttitudeList.RemoveAt(0);
+                            DeviceMotionAttitudeList.Add(e.Data);
+                            _deviceMotionAttitudeListFull.Add(e.Data);
+                            if (DeviceMotionAttitudeList.Count > DISPLAYROWCOUNT)
+                            {
+                                DeviceMotionAttitudeList.RemoveAt(0);
+                            }
                         }
                         break;
                     case WatchDataType.DeviceMotionAccelData:
-                        DeviceMotionAccelList.Add(e.Data);
-                        _deviceMotionAccellListFull.Add(e.Data);
-                        if (DeviceMotionAccelList.Count > DISPLAYROWCOUNT)
+                        if(_debugMode)
                         {
-                            DeviceMotionAccelList.RemoveAt(0);
+                            DeviceMotionAccelList.Add(e.Data);
+                            _deviceMotionAccellListFull.Add(e.Data);
+                            if (DeviceMotionAccelList.Count > DISPLAYROWCOUNT)
+                            {
+                                DeviceMotionAccelList.RemoveAt(0);
+                            }
                         }
                         break;
                     case WatchDataType.InitializationData:
-                        if(e.Data.Contains(":"))
+                        if (e.Data.Contains(":"))
                         {
                             var spl = e.Data.Split(':');
-                            if(spl.Count() > 0)
+                            if (spl.Count() > 0)
                             {
                                 _updateIntervalSeconds = Convert.ToDouble(spl[0]);
                                 WristLocationString = spl[1];
@@ -347,17 +445,23 @@ namespace CardinalInventoryApp.ViewModels
             });
         }
 
-        private void SetCurrentAttitudeRoll(string data)
+        private void SetCurrentAttitude(string data)
         {
             if(data.Contains(":"))
             {
                 var spl = data.Split(':');
-                if(spl.Count() > 1)
+                if(spl.Count() > 3)
                 {
+                    var pitch = Convert.ToDouble(spl[0]);
+                    CurrentAttitudePitch = pitch * RADIANSTODEGREES;
                     var roll = Convert.ToDouble(spl[1]);
                     CurrentAttitudeRoll = roll * RADIANSTODEGREES;
+                    var yaw = Convert.ToDouble(spl[2]);
+                    CurrentAttitudeYaw = yaw * RADIANSTODEGREES;
+                    var uts = Convert.ToUInt64(spl[3]);
+                    CurrentUnixTimestamp = uts;
                     CheckPouring();
-                    if(_initialAttitudeRoll == Double.MinValue)
+                    if (_initialAttitudeRoll == Double.MinValue)
                     {
                         _initialAttitudeRoll = roll;
                     }
@@ -367,9 +471,44 @@ namespace CardinalInventoryApp.ViewModels
 
         private void CheckPouring()
         {
-            if(!_isPouring)
+            CheckPouringPitch();
+            //CheckPouringRoll();
+        }
+
+        private void CheckPouringPitch()
+        {
+            if (!_isPouring)
             {
-                if(CurrentAttitudeRoll > ROLLSTART)
+                if (CurrentAttitudePitch > PITCHSTART)
+                {
+                    _isPouring = true;
+                    //_pourStartInterval = 0;
+                    _pourStartUnixTime = CurrentUnixTimestamp;
+                }
+            }
+            else
+            {
+                //_pourStartInterval++;
+                //MeasuredPourLength = _pourStartInterval * _updateIntervalSeconds;
+                MeasuredPourLength = (CurrentUnixTimestamp - _pourStartUnixTime) / 1000 * _updateIntervalSeconds;
+                if (CurrentAttitudePitch < PITCHSTOP)
+                {
+                    _isPouring = false;
+                    //_pourStartInterval = 0;
+                    _pourStartUnixTime = 0;
+                }
+            }
+        }
+
+        private void CheckPouringRoll()
+        {
+            if(!_debugMode)
+            {
+                return; // must update counter interval function
+            }
+            if (!_isPouring)
+            {
+                if (CurrentAttitudeRoll > ROLLSTART)
                 {
                     _isPouring = true;
                     _pourStartInterval = _deviceMotionAttitudeListFull.Count(); //called before record is added to collection
