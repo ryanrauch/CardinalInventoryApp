@@ -18,6 +18,11 @@ namespace CardinalInventoryApp.ViewModels
         private const int DISPLAYROWCOUNT = 14;
         private const double RADIANSTODEGREES = 180 / Math.PI;
 
+        private const double ROLLSTART = 80;
+        private const double ROLLSTOP = 10;
+        private int _pourStartInterval { get; set; }
+        private bool _isPouring { get; set; }
+
         public SmartWatchViewModel(
             IRequestService requestService,
             IWatchSessionManager watchSessionManager)
@@ -25,6 +30,9 @@ namespace CardinalInventoryApp.ViewModels
             _initialAttitudeRoll = Double.MinValue;
             _updateIntervalSeconds = 0.0d;
             WristLocationString = string.Empty;
+            _isPouring = false;
+            _pourStartInterval = 0;
+            PourSpouts = new ObservableCollection<PourSpout>();
 
             ClearData();
             _requestService = requestService;
@@ -52,6 +60,7 @@ namespace CardinalInventoryApp.ViewModels
             DeviceMotionAttitudeList = new ObservableCollection<string>();
             DeviceMotionAccelList = new ObservableCollection<string>();
             CurrentAttitudeRoll = 0.0d;
+            MeasuredPourLength = 0.0d;
         }
 
         private async Task SaveDataAsync()
@@ -71,6 +80,16 @@ namespace CardinalInventoryApp.ViewModels
             {
                 session.PourSpoutId = SelectedPourSpout.PourSpoutId;
             }
+            if (!String.IsNullOrEmpty(WristLocationString)
+               && String.Compare(WristLocationString, "Left", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                session.WristOrientation = SmartWatchWristOrientation.LeftHanded;
+            }
+            else
+            {
+                session.WristOrientation = SmartWatchWristOrientation.RightHanded;
+            }
+            
             await _requestService.PostAsync("SmartWatchSessions", session);
 
             for (int i = 0; i < _deviceMotionAttitudeListFull.Count; ++i)
@@ -119,6 +138,20 @@ namespace CardinalInventoryApp.ViewModels
                         }
                     }
                 }
+                // Accelerometer
+                if (_accelListFull.Count > i)
+                {
+                    if (_accelListFull[i].Contains(":"))
+                    {
+                        var splRate = _accelListFull[i].Split(':');
+                        if (splRate.Count() > 2)
+                        {
+                            data.AccelerometerX = Convert.ToDouble(splRate[0]);
+                            data.AccelerometerY = Convert.ToDouble(splRate[1]);
+                            data.AccelerometerZ = Convert.ToDouble(splRate[2]);
+                        }
+                    }
+                }
                 await _requestService.PostAsync("SmartWatchSessionData", data);
             }
             ClearData();
@@ -129,7 +162,7 @@ namespace CardinalInventoryApp.ViewModels
         private double _updateIntervalSeconds { get; set; }
         private DateTime _sessionTimestamp { get; set; }
 
-        private ObservableCollection<PourSpout> _pourSpouts { get; set; } = new ObservableCollection<PourSpout>();
+        private ObservableCollection<PourSpout> _pourSpouts { get; set; }
         public ObservableCollection<PourSpout> PourSpouts
         {
             get { return _pourSpouts; }
@@ -140,7 +173,7 @@ namespace CardinalInventoryApp.ViewModels
             }
         }
 
-        public string SelectedPourSpoutDescription => SelectedPourSpout?.Description;
+        public string SelectedPourSpoutDescription => SelectedPourSpout == null ? string.Empty : SelectedPourSpout.Description;
         private PourSpout _selectedPourSpout { get; set; }
         public PourSpout SelectedPourSpout
         {
@@ -149,9 +182,24 @@ namespace CardinalInventoryApp.ViewModels
             {
                 _selectedPourSpout = value;
                 RaisePropertyChanged(() => SelectedPourSpout);
+                RaisePropertyChanged(() => SelectedPourSpoutDescription);
             }
         }
 
+        public string MeasuredPourLengthString => MeasuredPourLength.ToString() + "sec";
+        private double _measuredPourLength { get; set; }
+        public double MeasuredPourLength
+        {
+            get { return _measuredPourLength; }
+            set
+            {
+                _measuredPourLength = value;
+                RaisePropertyChanged(() => MeasuredPourLength);
+                RaisePropertyChanged(() => MeasuredPourLengthString);
+            }
+        }
+
+        public string CurrentAttitudeRollString => CurrentAttitudeRoll.ToString();
         private double _currentAttitudeRoll { get; set; } // Degrees (0-360)
         public double CurrentAttitudeRoll 
         {
@@ -160,6 +208,7 @@ namespace CardinalInventoryApp.ViewModels
             {
                 _currentAttitudeRoll = value;
                 RaisePropertyChanged(() => CurrentAttitudeRoll);
+                RaisePropertyChanged(() => CurrentAttitudeRollString);
             }
         }
 
@@ -307,10 +356,32 @@ namespace CardinalInventoryApp.ViewModels
                 {
                     var roll = Convert.ToDouble(spl[1]);
                     CurrentAttitudeRoll = roll * RADIANSTODEGREES;
+                    CheckPouring();
                     if(_initialAttitudeRoll == Double.MinValue)
                     {
                         _initialAttitudeRoll = roll;
                     }
+                }
+            }
+        }
+
+        private void CheckPouring()
+        {
+            if(!_isPouring)
+            {
+                if(CurrentAttitudeRoll > ROLLSTART)
+                {
+                    _isPouring = true;
+                    _pourStartInterval = _deviceMotionAttitudeListFull.Count(); //called before record is added to collection
+                }
+            }
+            else
+            {
+                MeasuredPourLength = (_deviceMotionAttitudeListFull.Count() - _pourStartInterval) * _updateIntervalSeconds;
+                if (CurrentAttitudeRoll < ROLLSTOP)
+                {
+                    _isPouring = false;
+                    _pourStartInterval = 0;
                 }
             }
         }

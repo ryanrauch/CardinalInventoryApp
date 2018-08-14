@@ -8,4 +8,10 @@
         ReceivedAuto = 3,
         RemovedDuringInventory = 4
     }
+
+    public enum SmartWatchWristOrientation
+    {
+        LeftHanded = 0,
+        RightHanded = 1
+    }
 }

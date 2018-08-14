@@ -7,21 +7,23 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
 {
     public partial class InterfaceController : WKInterfaceController
     {
-        const double _updateInterval = 0.10d;
+        const bool INCLUDEGYRO = false;
+        const bool INCLUDEACCELEROMETER = true;
+        const double _updateInterval = 0.1d;
         WCSessionManager _sessionManager;
         CMMotionManager _motionManager;
 
         partial void OnButtonPress()
         {
-            WKExtension.SharedExtension.Autorotating = !WKExtension.SharedExtension.Autorotating;
-            if(WKExtension.SharedExtension.Autorotating)
-            {
-                myButton.SetTitle("Stop");
-            }
-            else
-            {
-                myButton.SetTitle("Start");
-            }
+            //WKExtension.SharedExtension.Autorotating = !WKExtension.SharedExtension.Autorotating;
+            //if(WKExtension.SharedExtension.Autorotating)
+            //{
+            //    myButton.SetTitle("Stop");
+            //}
+            //else
+            //{
+            //    myButton.SetTitle("Start");
+            //}
         }
 
         protected InterfaceController(IntPtr handle) : base(handle)
@@ -49,11 +51,15 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
         {
             // This method is called when the watch view controller is about to be visible to the user.
             Console.WriteLine("{0} will activate", this);
-            string initData = string.Format("{0}:{1}", 
+
+            WKExtension.SharedExtension.Autorotating = true;
+
+            string initData = string.Format("{0}:{1}",
                                             _updateInterval,
                                             WKInterfaceDevice.CurrentDevice.WristLocation.ToString());
+
             _sessionManager.SendData(WatchDataType.InitializationData, initData);
-            if (_motionManager.AccelerometerAvailable)
+            if (INCLUDEACCELEROMETER && _motionManager.AccelerometerAvailable)
             {
                 Console.WriteLine("AccelerometerAvailable");
                 _motionManager.StartAccelerometerUpdates(NSOperationQueue.CurrentQueue, (data, error) =>
@@ -61,7 +67,7 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
                     _sessionManager.SendData(WatchDataType.AccelData, data.Acceleration.X, data.Acceleration.Y, data.Acceleration.Z);
                 });
             }
-            if (_motionManager.GyroAvailable)
+            if (INCLUDEGYRO && _motionManager.GyroAvailable)
             {
                 Console.WriteLine("GyroAvailable");
                 _motionManager.StartGyroUpdates(NSOperationQueue.CurrentQueue, (data, error) =>
@@ -69,10 +75,10 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
                     _sessionManager.SendData(WatchDataType.GyroData, data.RotationRate.x, data.RotationRate.y, data.RotationRate.z);
                 });
             }
-            if(_motionManager.DeviceMotionAvailable)
+            if (_motionManager.DeviceMotionAvailable)
             {
                 Console.WriteLine("DeviceMotionAvailable");
-                _motionManager.StartDeviceMotionUpdates(NSOperationQueue.CurrentQueue, (data, error) =>
+                _motionManager.StartDeviceMotionUpdates(CMAttitudeReferenceFrame.XArbitraryZVertical, NSOperationQueue.CurrentQueue, (data, error) =>
                 {
                     _sessionManager.SendData(WatchDataType.DeviceMotionRotationRateData, data.RotationRate.x, data.RotationRate.y, data.RotationRate.z);
                     _sessionManager.SendData(WatchDataType.DeviceMotionAttitudeData, data.Attitude.Pitch, data.Attitude.Roll, data.Attitude.Yaw);
@@ -81,16 +87,16 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
                 });
             }
         }
-        
+
         public override void DidDeactivate()
         {
             // This method is called when the watch view controller is no longer visible to the user.
             Console.WriteLine("{0} did deactivate", this);
-            if(_motionManager.AccelerometerActive)
+            if(INCLUDEACCELEROMETER && _motionManager.AccelerometerActive)
             {
                 _motionManager.StopAccelerometerUpdates();
             }
-            if(_motionManager.GyroActive)
+            if(INCLUDEGYRO && _motionManager.GyroActive)
             {
                 _motionManager.StopGyroUpdates();
             }
@@ -98,6 +104,8 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
             {
                 _motionManager.StopDeviceMotionUpdates();
             }
+            //_sessionManager.StopSession();
+            WKExtension.SharedExtension.Autorotating = false;
         }
     }
 }

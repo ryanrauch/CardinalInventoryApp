@@ -5,14 +5,15 @@
                        xmlns:exs="clr-namespace:CardinalInventoryApp.Extensions"
                        x:Class="CardinalInventoryApp.Views.ContentPages.InitialView">
     <ContentPage.Content>
-        <StackLayout Orientation="Vertical" Margin="0,25,0,0">
+        <StackLayout Orientation="Vertical" Margin="0,25,0,0" Padding="10">
             <Image Aspect="AspectFit"
                    Source="{exs:ImageResource CardinalInventoryApp.Images.cardinalheader.png}"/>
             <Button Text="SmartWatchView" Command="{Binding SmartWatchViewCommand}"/>
             <Button Text="DirectionalView" Command="{Binding DirectionalViewCommand}"/>
-            <Button Text="ReceiveItemView" Command="{Binding ReceiveItemViewCommand}"/>
+            <Button Text="SmartWatchSessionDataView" Command="{Binding SmartWatchSessionDataViewCommand}"/>
+            <Button Text="ReceiveItemView" Margin="0,25,0,0" Command="{Binding ReceiveItemViewCommand}"/>
             <Button Text="ScanBarcodeView" Command="{Binding ScanBarcodeViewCommand}"/>
-            <Button Text="InventoryView" Command="{Binding InventoryViewCommand}"/>
+            <Button Text="InventoryView" Margin="0,25,0,0" Command="{Binding InventoryViewCommand}"/>
         </StackLayout>
     </ContentPage.Content>
 </local:InitialViewBase>
