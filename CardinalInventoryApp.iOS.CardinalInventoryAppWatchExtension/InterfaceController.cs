@@ -15,6 +15,11 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
         WCSessionManager _sessionManager;
         CMMotionManager _motionManager;
 
+        private bool _isPouring;
+        private ulong _pourStart;
+        const double PITCHSTART = 0.261d;
+        const double PITCHSTOP = 0.0d;
+
         protected InterfaceController(IntPtr handle) : base(handle)
         {
             // Note: this .ctor should not contain any initialization logic.
@@ -25,6 +30,8 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
                 AccelerometerUpdateInterval = _updateInterval,
                 DeviceMotionUpdateInterval = _updateInterval
             };
+            _isPouring = false;
+            _pourStart = 0;
         }
 
         public override void Awake(NSObject context)
@@ -82,10 +89,37 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
                         UserAccelerationX = data.UserAcceleration.X,
                         UserAccelerationY = data.UserAcceleration.Y,
                         UserAccelerationZ = data.UserAcceleration.Z,
+                        RotationRateX = data.RotationRate.x,
+                        RotationRateY = data.RotationRate.y,
+                        RotationRateZ = data.RotationRate.z,
                         TimestampUnixMs = Convert.ToUInt64(new DateTimeOffset(DateTime.Now.ToUniversalTime()).ToUnixTimeMilliseconds())
                     };
                     _sessionManager.SendData(swsd);
+                    CheckPouring(swsd);
                 });
+            }
+        }
+
+        private void CheckPouring(SmartWatchSessionData data)
+        {
+            if(!_isPouring
+               && data.AttitudePitch > PITCHSTART)
+            {
+                _isPouring = true;
+                _pourStart = data.TimestampUnixMs;
+                WKInterfaceDevice.CurrentDevice.PlayHaptic(WKHapticType.Start);
+            }
+            else if(_isPouring
+                    && data.AttitudePitch < PITCHSTOP)
+            {
+                _isPouring = false;
+                WKInterfaceDevice.CurrentDevice.PlayHaptic(WKHapticType.Stop);
+            }
+            else if(_isPouring
+                    && data.TimestampUnixMs - _pourStart > 2000)
+            {
+                _isPouring = false;
+                WKInterfaceDevice.CurrentDevice.PlayHaptic(WKHapticType.Stop);
             }
         }
 

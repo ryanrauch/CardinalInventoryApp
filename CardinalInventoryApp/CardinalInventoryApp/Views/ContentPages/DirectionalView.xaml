@@ -5,7 +5,7 @@
                            xmlns:exs ="clr-namespace:CardinalInventoryApp.Extensions"
                            x:Class="CardinalInventoryApp.Views.ContentPages.DirectionalView">
     <ContentPage.Content>
-        <Grid>
+        <Grid BackgroundColor="{StaticResource CardinalHighlightColor}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="120"/>

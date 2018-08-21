@@ -84,24 +84,22 @@ namespace CardinalInventoryApp.ViewModels
             {
                 SessionDataList = new ObservableCollection<SmartWatchSessionData>();
             }
-            else
-            {
-                _sessionTimestamp = DateTime.Now;
-                _gyroListFull = new List<string>();
-                _accelListFull = new List<string>();
-                _deviceMotionListFull = new List<string>();
-                _deviceMotionAttitudeListFull = new List<string>();
-                _deviceMotionAccellListFull = new List<string>();
+            _sessionTimestamp = DateTime.Now;
+            _gyroListFull = new List<string>();
+            _accelListFull = new List<string>();
+            _deviceMotionListFull = new List<string>();
+            _deviceMotionAttitudeListFull = new List<string>();
+            _deviceMotionAccellListFull = new List<string>();
 
-                GyroList = new ObservableCollection<string>();
-                AccelList = new ObservableCollection<string>();
-                DeviceMotionList = new ObservableCollection<string>();
-                DeviceMotionAttitudeList = new ObservableCollection<string>();
-                DeviceMotionAccelList = new ObservableCollection<string>();
-                CurrentAttitudeRoll = 0.0d;
-                MeasuredPourLength = 0.0d;
-                _pourStartUnixTime = 0;
-            }
+            GyroList = new ObservableCollection<string>();
+            AccelList = new ObservableCollection<string>();
+            DeviceMotionList = new ObservableCollection<string>();
+            DeviceMotionAttitudeList = new ObservableCollection<string>();
+            DeviceMotionAccelList = new ObservableCollection<string>();
+            CurrentAttitudeRoll = 0.0d;
+            MeasuredPourLength = 0.0d;
+            _pourStartUnixTime = 0;
+            
         }
 
         private async Task SaveDataAsync()
@@ -411,7 +409,7 @@ namespace CardinalInventoryApp.ViewModels
         }
         private void _watchSessionManager_DataReceived(object sender, WatchDataEventArgs e)
         {
-            Xamarin.Forms.Device.BeginInvokeOnMainThread(() =>
+            Device.BeginInvokeOnMainThread(() =>
             {
                 switch (e.WatchDataType)
                 {
