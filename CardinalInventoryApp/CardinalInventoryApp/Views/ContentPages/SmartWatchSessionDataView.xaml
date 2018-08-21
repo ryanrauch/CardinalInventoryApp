@@ -5,10 +5,10 @@
              xmlns:microcharts="clr-namespace:Microcharts.Forms;assembly=Microcharts.Forms"
              x:Class="CardinalInventoryApp.Views.ContentPages.SmartWatchSessionDataView">
     <ContentPage.Content>
-        <Grid>
+        <!--<Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="2*"/>
             </Grid.RowDefinitions>
             <ListView Grid.Row="0"
                       ItemsSource="{Binding SmartWatchSessions}"
@@ -16,12 +16,61 @@
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
-                            <Label Text="{Binding Interval}"/>
+                            <Label Text="{Binding Description}"/>
                         </ViewCell>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <microcharts:ChartView Grid.Row="1" Chart="{Binding AttitudePitchChart}"/>
+            <ScrollView Grid.Row="1"
+                        Orientation="Vertical">
+                <StackLayout Orientation="Vertical">
+                    <Label Text="AttitudePitch"/>
+                    <microcharts:ChartView Chart="{Binding AttitudePitchChart}" WidthRequest="400" HeightRequest="200"/>
+                    <Label Text="AttitudeRoll"/>
+                    <microcharts:ChartView Chart="{Binding AttitudeRollChart}" WidthRequest="400" HeightRequest="200"/>
+                    <Label Text="AttitudeYaw"/>
+                    <microcharts:ChartView Chart="{Binding AttitudeYawChart}" WidthRequest="400" HeightRequest="200"/>
+                </StackLayout>
+            </ScrollView>
+        </Grid>-->
+        <Grid Margin="0,25,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="25"/>
+                <RowDefinition Height="35"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" 
+                   Text="SmartWatchSession" 
+                   HorizontalTextAlignment="Start"/>
+            <Picker Grid.Row="1"
+                    ItemsSource="{Binding SmartWatchSessions}"
+                    SelectedItem="{Binding SelectedSmartWatchSession}"
+                    ItemDisplayBinding="{Binding Description}"/>
+            <ScrollView Grid.Row="2"
+                        Orientation="Vertical">
+                <StackLayout Orientation="Vertical"
+                             HorizontalOptions="StartAndExpand">
+                    <Label Text="AttitudePitch" 
+                           HorizontalTextAlignment="Start"/>
+                    <microcharts:ChartView Chart="{Binding AttitudePitchChart}" WidthRequest="400" HeightRequest="200"/>
+                    <Label Text="AttitudeRoll" 
+                           HorizontalTextAlignment="Start"/>
+                    <microcharts:ChartView Chart="{Binding AttitudeRollChart}" WidthRequest="400" HeightRequest="200"/>
+                    <Label Text="AttitudeYaw" 
+                           HorizontalTextAlignment="Start"/>
+                    <microcharts:ChartView Chart="{Binding AttitudeYawChart}" WidthRequest="400" HeightRequest="200"/>
+
+                    <Label Text="UserAccelerationX" 
+                           HorizontalTextAlignment="Start"/>
+                    <microcharts:ChartView Chart="{Binding UserAccelerationXChart}" WidthRequest="400" HeightRequest="200"/>
+                    <Label Text="UserAccelerationY" 
+                           HorizontalTextAlignment="Start"/>
+                    <microcharts:ChartView Chart="{Binding UserAccelerationYChart}" WidthRequest="400" HeightRequest="200"/>
+                    <Label Text="UserAccelerationZ" 
+                           HorizontalTextAlignment="Start"/>
+                    <microcharts:ChartView Chart="{Binding UserAccelerationZChart}" WidthRequest="400" HeightRequest="200"/>
+                </StackLayout>
+            </ScrollView>
         </Grid>
     </ContentPage.Content>
 </local:SmartWatchSessionDataViewBase>
