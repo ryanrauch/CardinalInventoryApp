@@ -2,10 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CardinalInventoryApp.Contracts;
 using CardinalInventoryApp.iOS.DependencyServices;
 using CardinalInventoryApp.Services.Interfaces;
 using Foundation;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using WatchConnectivity;
 using Xamarin.Forms;
 
@@ -14,9 +17,20 @@ namespace CardinalInventoryApp.iOS.DependencyServices
 {
     public class WCSessionManager : WCSessionDelegate, IWatchSessionManager
     {
+        private readonly JsonSerializerSettings _serializerSettings;
         public event EventHandler<WatchDataEventArgs> DataReceived;
 
-        public WCSessionManager() : base() { }
+        public WCSessionManager() : base()
+        {
+            _serializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+                DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                NullValueHandling = NullValueHandling.Ignore
+            };
+            _serializerSettings.Converters.Add(new StringEnumConverter());
+        }
 
         public bool IsPairedSession()
         {
@@ -40,6 +54,12 @@ namespace CardinalInventoryApp.iOS.DependencyServices
         public void StopSession()
         {
             _session = null;
+        }
+
+        public void SendData(SmartWatchSessionData data)
+        {
+            string serialized = JsonConvert.SerializeObject(data, _serializerSettings);
+            SendData(WatchDataType.SmartWatchSessionDataObj, serialized);
         }
 
         public void SendData(WatchDataType type, double x, double y, double z)

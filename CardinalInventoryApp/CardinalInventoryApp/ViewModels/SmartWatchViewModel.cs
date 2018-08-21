@@ -7,12 +7,18 @@ using System.Windows.Input;
 using CardinalInventoryApp.Contracts;
 using CardinalInventoryApp.Services.Interfaces;
 using CardinalInventoryApp.ViewModels.Base;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using Xamarin.Forms;
 
 namespace CardinalInventoryApp.ViewModels
 {
     public class SmartWatchViewModel : ViewModelBase
     {
+        private const bool USESMARTWATCHSESSIONDATA = true;
+
+        private readonly JsonSerializerSettings _serializerSettings;
         private readonly IRequestService _requestService;
         private readonly IWatchSessionManager _watchSessionManager;
         private const int DISPLAYROWCOUNT = 12;
@@ -43,6 +49,15 @@ namespace CardinalInventoryApp.ViewModels
             _pourStartUnixTime = 0;
             PourSpouts = new ObservableCollection<PourSpout>();
 
+            _serializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+                DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                NullValueHandling = NullValueHandling.Ignore
+            };
+            _serializerSettings.Converters.Add(new StringEnumConverter());
+
             ClearData();
             _requestService = requestService;
             _watchSessionManager = watchSessionManager;
@@ -65,21 +80,28 @@ namespace CardinalInventoryApp.ViewModels
 
         private void ClearData()
         {
-            _sessionTimestamp = DateTime.Now;
-            _gyroListFull = new List<string>();
-            _accelListFull = new List<string>();
-            _deviceMotionListFull = new List<string>();
-            _deviceMotionAttitudeListFull = new List<string>();
-            _deviceMotionAccellListFull = new List<string>();
+            if(USESMARTWATCHSESSIONDATA)
+            {
+                SessionDataList = new ObservableCollection<SmartWatchSessionData>();
+            }
+            else
+            {
+                _sessionTimestamp = DateTime.Now;
+                _gyroListFull = new List<string>();
+                _accelListFull = new List<string>();
+                _deviceMotionListFull = new List<string>();
+                _deviceMotionAttitudeListFull = new List<string>();
+                _deviceMotionAccellListFull = new List<string>();
 
-            GyroList = new ObservableCollection<string>();
-            AccelList = new ObservableCollection<string>();
-            DeviceMotionList = new ObservableCollection<string>();
-            DeviceMotionAttitudeList = new ObservableCollection<string>();
-            DeviceMotionAccelList = new ObservableCollection<string>();
-            CurrentAttitudeRoll = 0.0d;
-            MeasuredPourLength = 0.0d;
-            _pourStartUnixTime = 0;
+                GyroList = new ObservableCollection<string>();
+                AccelList = new ObservableCollection<string>();
+                DeviceMotionList = new ObservableCollection<string>();
+                DeviceMotionAttitudeList = new ObservableCollection<string>();
+                DeviceMotionAccelList = new ObservableCollection<string>();
+                CurrentAttitudeRoll = 0.0d;
+                MeasuredPourLength = 0.0d;
+                _pourStartUnixTime = 0;
+            }
         }
 
         private async Task SaveDataAsync()
@@ -92,14 +114,14 @@ namespace CardinalInventoryApp.ViewModels
             var session = new SmartWatchSession()
             {
                 SmartWatchSessionId = Guid.NewGuid(),
-                Description = "SmartWatchViewModel",
+                Description = "SmartWatchViewModel2",
                 IntervalDuration = Convert.ToDecimal(_updateIntervalSeconds),
                 AttitudeRollOffset = _initialAttitudeRoll,
                 Timestamp = DateTime.Now.ToUniversalTime(),
                 IntervalStart = 0,
                 IntervalStop = 0
             };
-            if(SelectedPourSpout != null)
+            if (SelectedPourSpout != null)
             {
                 session.PourSpoutId = SelectedPourSpout.PourSpoutId;
             }
@@ -112,71 +134,82 @@ namespace CardinalInventoryApp.ViewModels
             {
                 session.WristOrientation = SmartWatchWristOrientation.RightHanded;
             }
-            
             await _requestService.PostAsync("SmartWatchSessions", session);
 
-            for (int i = 0; i < _deviceMotionAttitudeListFull.Count; ++i)
+            if (USESMARTWATCHSESSIONDATA)
             {
-                var data = new SmartWatchSessionData()
+                for (int i = 0; i < SessionDataList.Count; ++i)
                 {
-                    SmartWatchSessionId = session.SmartWatchSessionId,
-                    Interval = i
-                };
-                // MotionAttitude
-                if(_deviceMotionAttitudeListFull[i].Contains(":"))
-                {
-                    var splAttitude = _deviceMotionAttitudeListFull[i].Split(':');
-                    if (splAttitude.Count() > 3)
-                    {
-                        data.AttitudePitch = Convert.ToDouble(splAttitude[0]);
-                        data.AttitudeRoll = Convert.ToDouble(splAttitude[1]);
-                        data.AttitudeYaw = Convert.ToDouble(splAttitude[2]);
-                        data.TimestampUnixMs = Convert.ToUInt64(splAttitude[3]);
-                    }
+                    SessionDataList[i].SmartWatchSessionId = session.SmartWatchSessionId;
+                    SessionDataList[i].Interval = i;
+                    await _requestService.PostAsync("SmartWatchSessionData", SessionDataList[i]);
                 }
-                // RotationRate
-                if(_deviceMotionListFull.Count > i)
+            }
+            else
+            {
+                for (int i = 0; i < _deviceMotionAttitudeListFull.Count; ++i)
                 {
-                    if(_deviceMotionListFull[i].Contains(":"))
+                    var data = new SmartWatchSessionData()
                     {
-                        var splRate = _deviceMotionListFull[i].Split(':');
-                        if (splRate.Count() > 2)
+                        SmartWatchSessionId = session.SmartWatchSessionId,
+                        Interval = i
+                    };
+                    // MotionAttitude
+                    if (_deviceMotionAttitudeListFull[i].Contains(":"))
+                    {
+                        var splAttitude = _deviceMotionAttitudeListFull[i].Split(':');
+                        if (splAttitude.Count() > 3)
                         {
-                            data.RotationRateX = Convert.ToDouble(splRate[0]);
-                            data.RotationRateY = Convert.ToDouble(splRate[1]);
-                            data.RotationRateZ = Convert.ToDouble(splRate[2]);
+                            data.AttitudePitch = Convert.ToDouble(splAttitude[0]);
+                            data.AttitudeRoll = Convert.ToDouble(splAttitude[1]);
+                            data.AttitudeYaw = Convert.ToDouble(splAttitude[2]);
+                            data.TimestampUnixMs = Convert.ToUInt64(splAttitude[3]);
                         }
                     }
-                }
-                // UserAcceleration
-                if (_deviceMotionAccellListFull.Count > i)
-                {
-                    if (_deviceMotionAccellListFull[i].Contains(":"))
+                    // RotationRate
+                    if (_deviceMotionListFull.Count > i)
                     {
-                        var splRate = _deviceMotionAccellListFull[i].Split(':');
-                        if (splRate.Count() > 2)
+                        if (_deviceMotionListFull[i].Contains(":"))
                         {
-                            data.UserAccelerationX = Convert.ToDouble(splRate[0]);
-                            data.UserAccelerationY = Convert.ToDouble(splRate[1]);
-                            data.UserAccelerationZ = Convert.ToDouble(splRate[2]);
+                            var splRate = _deviceMotionListFull[i].Split(':');
+                            if (splRate.Count() > 2)
+                            {
+                                data.RotationRateX = Convert.ToDouble(splRate[0]);
+                                data.RotationRateY = Convert.ToDouble(splRate[1]);
+                                data.RotationRateZ = Convert.ToDouble(splRate[2]);
+                            }
                         }
                     }
-                }
-                // Accelerometer
-                if (_accelListFull.Count > i)
-                {
-                    if (_accelListFull[i].Contains(":"))
+                    // UserAcceleration
+                    if (_deviceMotionAccellListFull.Count > i)
                     {
-                        var splRate = _accelListFull[i].Split(':');
-                        if (splRate.Count() > 2)
+                        if (_deviceMotionAccellListFull[i].Contains(":"))
                         {
-                            data.AccelerometerX = Convert.ToDouble(splRate[0]);
-                            data.AccelerometerY = Convert.ToDouble(splRate[1]);
-                            data.AccelerometerZ = Convert.ToDouble(splRate[2]);
+                            var splRate = _deviceMotionAccellListFull[i].Split(':');
+                            if (splRate.Count() > 2)
+                            {
+                                data.UserAccelerationX = Convert.ToDouble(splRate[0]);
+                                data.UserAccelerationY = Convert.ToDouble(splRate[1]);
+                                data.UserAccelerationZ = Convert.ToDouble(splRate[2]);
+                            }
                         }
                     }
+                    // Accelerometer
+                    if (_accelListFull.Count > i)
+                    {
+                        if (_accelListFull[i].Contains(":"))
+                        {
+                            var splRate = _accelListFull[i].Split(':');
+                            if (splRate.Count() > 2)
+                            {
+                                data.AccelerometerX = Convert.ToDouble(splRate[0]);
+                                data.AccelerometerY = Convert.ToDouble(splRate[1]);
+                                data.AccelerometerZ = Convert.ToDouble(splRate[2]);
+                            }
+                        }
+                    }
+                    await _requestService.PostAsync("SmartWatchSessionData", data);
                 }
-                await _requestService.PostAsync("SmartWatchSessionData", data);
             }
             ClearData();
             IsBusy = false;
@@ -242,6 +275,17 @@ namespace CardinalInventoryApp.ViewModels
                 RaisePropertyChanged(() => MeasuredPourLengthString);
                 RaisePropertyChanged(() => MeasuredPourVolumeString);
                 RaisePropertyChanged(() => MeasuredPourVolumeOzString);
+            }
+        }
+
+        private ObservableCollection<SmartWatchSessionData> _sessionDataList { get; set; } = new ObservableCollection<SmartWatchSessionData>();
+        public ObservableCollection<SmartWatchSessionData> SessionDataList
+        {
+            get { return _sessionDataList; }
+            set
+            {
+                _sessionDataList = value;
+                RaisePropertyChanged(() => SessionDataList);
             }
         }
 
@@ -439,10 +483,24 @@ namespace CardinalInventoryApp.ViewModels
                             }
                         }
                         break;
+                    case WatchDataType.SmartWatchSessionDataObj:
+                        var swsd = JsonConvert.DeserializeObject<SmartWatchSessionData>(e.Data, _serializerSettings);
+                        SetCurrentAttitude(swsd);
+                        SessionDataList.Add(swsd);
+                        break;
                     default:
                         break;
                 }
             });
+        }
+
+        private void SetCurrentAttitude(SmartWatchSessionData data)
+        {
+            CurrentAttitudePitch = data.AttitudePitch * RADIANSTODEGREES;
+            CurrentAttitudeRoll = data.AttitudeRoll * RADIANSTODEGREES;
+            CurrentAttitudeYaw = data.AttitudeYaw * RADIANSTODEGREES;
+            CurrentUnixTimestamp = data.TimestampUnixMs;
+            CheckPouring();
         }
 
         private void SetCurrentAttitude(string data)

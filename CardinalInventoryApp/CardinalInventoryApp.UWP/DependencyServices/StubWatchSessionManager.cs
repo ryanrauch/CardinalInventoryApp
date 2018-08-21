@@ -1,4 +1,5 @@
-﻿using CardinalInventoryApp.Services.Interfaces;
+﻿using CardinalInventoryApp.Contracts;
+using CardinalInventoryApp.Services.Interfaces;
 using CardinalInventoryApp.UWP.DependencyServices;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,11 @@ namespace CardinalInventoryApp.UWP.DependencyServices
         }
 
         public void SendData(WatchDataType type, double x, double y, double z)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SendData(SmartWatchSessionData data)
         {
             throw new NotImplementedException();
         }

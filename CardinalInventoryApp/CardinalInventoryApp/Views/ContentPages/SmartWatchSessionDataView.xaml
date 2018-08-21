@@ -2,12 +2,26 @@
 <local:SmartWatchSessionDataViewBase xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:CardinalInventoryApp.Views.ContentPages"
+             xmlns:microcharts="clr-namespace:Microcharts.Forms;assembly=Microcharts.Forms"
              x:Class="CardinalInventoryApp.Views.ContentPages.SmartWatchSessionDataView">
     <ContentPage.Content>
-        <StackLayout>
-            <Label Text="Welcome to Xamarin.Forms!"
-                VerticalOptions="CenterAndExpand" 
-                HorizontalOptions="CenterAndExpand" />
-        </StackLayout>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <ListView Grid.Row="0"
+                      ItemsSource="{Binding SmartWatchSessions}"
+                      SelectedItem="{Binding SelectedSmartWatchSession}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Label Text="{Binding Interval}"/>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <microcharts:ChartView Grid.Row="1" Chart="{Binding AttitudePitchChart}"/>
+        </Grid>
     </ContentPage.Content>
 </local:SmartWatchSessionDataViewBase>

@@ -134,5 +134,11 @@
   <ItemGroup>
     <BundleResource Include="PushNotificationPayload.json" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CardinalInventoryApp\CardinalInventoryApp\CardinalInventoryApp.csproj">
+      <Project>{D6AB4235-F600-424C-959B-22B24C92B0AC}</Project>
+      <Name>CardinalInventoryApp</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\WatchOS\Xamarin.WatchOS.AppExtension.CSharp.targets" />
 </Project>

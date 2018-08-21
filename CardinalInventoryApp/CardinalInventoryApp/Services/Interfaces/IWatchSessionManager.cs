@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CardinalInventoryApp.Contracts;
+using System;
 using System.Collections.Generic;
 
 namespace CardinalInventoryApp.Services.Interfaces
@@ -12,6 +13,8 @@ namespace CardinalInventoryApp.Services.Interfaces
         void StopSession();
         void SendData(WatchDataType type, string data);
         void SendData(WatchDataType type, double x, double y, double z);
+        void SendData(SmartWatchSessionData data);
+
     }
 
     public enum WatchDataType
@@ -21,7 +24,8 @@ namespace CardinalInventoryApp.Services.Interfaces
         DeviceMotionRotationRateData,
         DeviceMotionAttitudeData,
         DeviceMotionAccelData,
-        InitializationData
+        InitializationData,
+        SmartWatchSessionDataObj
     };
 
     public class WatchDataEventArgs : EventArgs
@@ -61,6 +65,10 @@ namespace CardinalInventoryApp.Services.Interfaces
             else if(wdt.Equals(WatchDataType.InitializationData.ToString()))
             {
                 WatchDataType = WatchDataType.InitializationData;
+            }
+            else if (wdt.Equals(WatchDataType.SmartWatchSessionDataObj.ToString()))
+            {
+                WatchDataType = WatchDataType.SmartWatchSessionDataObj;
             }
         }
     }

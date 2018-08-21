@@ -4,10 +4,32 @@ using System.Collections.Generic;
 using System.Linq;
 using Foundation;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using WatchConnectivity;
 
 namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
 {
+    public class SmartWatchSessionData
+    {
+        public int Interval { get; set; }
+        public Guid SmartWatchSessionId { get; set; }
+        //public SmartWatchSession SmartWatchSession { get; set; }
+        public double AttitudePitch { get; set; }
+        public double AttitudeRoll { get; set; }
+        public double AttitudeYaw { get; set; }
+        public double RotationRateX { get; set; }
+        public double RotationRateY { get; set; }
+        public double RotationRateZ { get; set; }
+        public double UserAccelerationX { get; set; }
+        public double UserAccelerationY { get; set; }
+        public double UserAccelerationZ { get; set; }
+        public double AccelerometerX { get; set; }
+        public double AccelerometerY { get; set; }
+        public double AccelerometerZ { get; set; }
+        public UInt64 TimestampUnixMs { get; set; }
+    }
+
     public enum WatchDataType
     {
         GyroData,
@@ -15,7 +37,8 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
         DeviceMotionRotationRateData,
         DeviceMotionAttitudeData,
         DeviceMotionAccelData,
-        InitializationData
+        InitializationData,
+        SmartWatchSessionDataObj
     };
 
     public class WatchDataEventArgs : EventArgs
@@ -56,14 +79,30 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
             {
                 WatchDataType = WatchDataType.InitializationData;
             }
+            else if (wdt.Equals(WatchDataType.SmartWatchSessionDataObj.ToString()))
+            {
+                WatchDataType = WatchDataType.SmartWatchSessionDataObj;
+            }
         }
     }
 
     public class WCSessionManager : WCSessionDelegate
     {
+        private readonly JsonSerializerSettings _serializerSettings;
+
         public event EventHandler<WatchDataEventArgs> DataReceived;
 
-        public WCSessionManager() : base() { }
+        public WCSessionManager() : base()
+        {
+            _serializerSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+                DateFormatHandling = DateFormatHandling.IsoDateFormat,
+                NullValueHandling = NullValueHandling.Ignore
+            };
+            _serializerSettings.Converters.Add(new StringEnumConverter());
+        }
 
         public bool IsPairedSession()
         {
@@ -93,6 +132,12 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
         {
             //return dt.ToUniversalTime().Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
             return new DateTimeOffset(dt.ToUniversalTime()).ToUnixTimeMilliseconds();
+        }
+
+        public void SendData(SmartWatchSessionData data)
+        {
+            string serialized = JsonConvert.SerializeObject(data, _serializerSettings);
+            SendData(WatchDataType.SmartWatchSessionDataObj, serialized);
         }
 
         public void SendData(WatchDataType type, double x, double y, double z)

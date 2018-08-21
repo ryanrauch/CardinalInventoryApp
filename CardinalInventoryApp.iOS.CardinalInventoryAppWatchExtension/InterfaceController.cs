@@ -2,6 +2,7 @@
 using WatchKit;
 using Foundation;
 using CoreMotion;
+using CardinalInventoryApp.Contracts;
 
 namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
 {
@@ -10,7 +11,7 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
         const bool INCLUDEGYRO = false;
         const bool INCLUDEACCELEROMETER = false;
 
-        const double _updateInterval = 0.10d;
+        const double _updateInterval = 1.0d / 60.0d; //0.10d;
         WCSessionManager _sessionManager;
         CMMotionManager _motionManager;
 
@@ -68,11 +69,22 @@ namespace CardinalInventoryApp.iOS.CardinalInventoryAppWatchExtension
                 Console.WriteLine("DeviceMotionAvailable");
                 _motionManager.StartDeviceMotionUpdates(CMAttitudeReferenceFrame.XArbitraryZVertical, NSOperationQueue.CurrentQueue, (data, error) =>
                 {
-                    //_sessionManager.SendData(WatchDataType.DeviceMotionRotationRateData, data.RotationRate.x, data.RotationRate.y, data.RotationRate.z);
-                    _sessionManager.SendData(WatchDataType.DeviceMotionAttitudeData, data.Attitude.Pitch, data.Attitude.Roll, data.Attitude.Yaw);
-                    _sessionManager.SendData(WatchDataType.DeviceMotionAccelData, data.UserAcceleration.X, data.UserAcceleration.Y, data.UserAcceleration.Z);
-                    //myLabel.SetText(string.Format("X{0} Y{1} Z{2}", data.UserAcceleration.X, data.UserAcceleration.Y, data.UserAcceleration.Z));
-                    //myLabel.SetText(string.Format("{0}", DateTime.Now.Ticks));
+                    ////_sessionManager.SendData(WatchDataType.DeviceMotionRotationRateData, data.RotationRate.x, data.RotationRate.y, data.RotationRate.z);
+                    //_sessionManager.SendData(WatchDataType.DeviceMotionAttitudeData, data.Attitude.Pitch, data.Attitude.Roll, data.Attitude.Yaw);
+                    //_sessionManager.SendData(WatchDataType.DeviceMotionAccelData, data.UserAcceleration.X, data.UserAcceleration.Y, data.UserAcceleration.Z);
+                    ////myLabel.SetText(string.Format("X{0} Y{1} Z{2}", data.UserAcceleration.X, data.UserAcceleration.Y, data.UserAcceleration.Z));
+                    ////myLabel.SetText(string.Format("{0}", DateTime.Now.Ticks));
+                    SmartWatchSessionData swsd = new SmartWatchSessionData()
+                    {
+                        AttitudePitch = data.Attitude.Pitch,
+                        AttitudeRoll = data.Attitude.Roll,
+                        AttitudeYaw = data.Attitude.Yaw,
+                        UserAccelerationX = data.UserAcceleration.X,
+                        UserAccelerationY = data.UserAcceleration.Y,
+                        UserAccelerationZ = data.UserAcceleration.Z,
+                        TimestampUnixMs = Convert.ToUInt64(new DateTimeOffset(DateTime.Now.ToUniversalTime()).ToUnixTimeMilliseconds())
+                    };
+                    _sessionManager.SendData(swsd);
                 });
             }
         }
