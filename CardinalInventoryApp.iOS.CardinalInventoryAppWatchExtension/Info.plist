@@ -28,9 +28,9 @@
 	</dict>
 	<key>WKExtensionDelegateClassName</key>
 	<string>ExtensionDelegate</string>
-  <key>WKBackgroundModes</key>
-  <array>
-    <string>workout-processing</string>
-  </array>
+	<key>WKBackgroundModes</key>
+	<array>
+		<string>workout-processing</string>
+	</array>
 </dict>
 </plist>
