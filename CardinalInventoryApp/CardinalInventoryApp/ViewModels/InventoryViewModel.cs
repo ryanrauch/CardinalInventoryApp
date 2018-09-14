@@ -5,6 +5,7 @@ using Microsoft.WindowsAzure.Storage.Blob;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -179,18 +180,20 @@ namespace CardinalInventoryApp.ViewModels
 
         private async Task<bool> CreateInventoryActionHistory(Decimal level, InventoryAction action)
         {
+            Debug.WriteLine("InventoryViewModel::CreateInventoryActionHistory() - Not finished");
+            return true;
             var ah = new InventoryActionHistory()
             {
                 InventoryActionHistoryId = Guid.NewGuid(),
                 Action = action,
-                StockItemId = SelectedStockItem.StockItemId,
+                //SerializedStockItemId = //SelectedStockItem.StockItemId,
                 Timestamp = DateTime.Now,
                 ItemLevel = level,
                 ApplicationUserId = App.CurrentApplicationUserContract.Id,
                 AreaId = _currentArea.AreaId
             };
             SelectedItemLevel = level;
-            var res = await _requestService.PostAsync("inventoryActionHistories", ah);
+            var res = await _requestService.PostAsync("InventoryActionHistories", ah);
             return res != null;
         }
 
@@ -271,7 +274,9 @@ namespace CardinalInventoryApp.ViewModels
         private List<Bar> _bars { get; set; }
         private List<Building> _buildings { get; set; }
         private List<Area> _areas { get; set; }
-        private List<StockItemCategory> _stockItemCategories { get; set; }
+        //private List<StockItemCategory> _stockItemCategories { get; set; }
+        private List<SerializedStockItem> _serializedStockItems { get; set; }
+        private List<StockItemTag> _stockItemTags { get; set; }
         private List<StockItem> _stockItems { get; set; }
         private ImageSource[] _stockItemImages { get; set; }
         //inventory & actions?
@@ -293,21 +298,21 @@ namespace CardinalInventoryApp.ViewModels
             var reqBars = _requestService.GetAsync<List<Bar>>("Bars");
             var reqBuildings = _requestService.GetAsync<List<Building>>("Buildings");
             var reqAreas = _requestService.GetAsync<List<Area>>("Areas");
-            var reqStockItemCategories = _requestService.GetAsync<List<StockItemCategory>>("StockItemCategories");
+            //var reqStockItemCategories = _requestService.GetAsync<List<StockItemCategory>>("StockItemCategories");
             var reqStockItems = _requestService.GetAsync<List<StockItem>>("StockItems");
             var reqBlobs = _blobStorageService.GetBlobs<CloudBlockBlob>("stockitemspng");
             await Task.WhenAll(reqApplicationUsers,
                                reqBars, 
                                reqBuildings,
                                reqAreas,
-                               reqStockItemCategories,
-                               reqStockItems,
-                               reqBlobs);
+                               //reqStockItemCategories,
+                               reqBlobs,
+                               reqStockItems);
             _applicationUserContracts = await reqApplicationUsers;
             _bars = await reqBars;
             _buildings = await reqBuildings;
             _areas = await reqAreas;
-            _stockItemCategories = await reqStockItemCategories;
+            //_stockItemCategories = await reqStockItemCategories;
             _stockItems = await reqStockItems;
             _blobs = await reqBlobs;
 
@@ -323,14 +328,14 @@ namespace CardinalInventoryApp.ViewModels
             if (_stockItems.Count > 0)
             {
                 SelectedStockItem = _stockItems[0];
-                var blob = _blobs.Find(p => p.Name.Equals(_stockItems[0].ImagePath));
-                if (blob != null)
+                SelectedImageSource = null;
+                if (!String.IsNullOrEmpty(_stockItems[0].ImagePath))
                 {
-                    SelectedImageSource = ImageSource.FromUri(blob.Uri);
-                }
-                else
-                {
-                    SelectedImageSource = null;
+                    var blob = _blobs.Find(p => p.Name.Equals(_stockItems[0].ImagePath));
+                    if (blob != null)
+                    {
+                        SelectedImageSource = ImageSource.FromUri(blob.Uri);
+                    }
                 }
                 _stockItemImages = new ImageSource[_stockItems.Count];
                 for(int i = 0; i < _stockItems.Count; ++i)

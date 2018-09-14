@@ -2,9 +2,10 @@
 
 namespace CardinalInventoryApp.Contracts
 {
-    public class StockItemCategory
+    public class Company
     {
-        public Guid StockItemCategoryId { get; set; }
+        public Guid CompanyId { get; set; }
         public string Description { get; set; }
+        public bool Active { get; set; }
     }
 }
