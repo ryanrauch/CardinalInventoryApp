@@ -50,7 +50,10 @@ namespace CardinalInventoryApp.iOS.ScanBarcode
         {
             var deviceDiscovery = AVCaptureDeviceDiscoverySession.Create(
                 new AVCaptureDeviceType[] { AVCaptureDeviceType.BuiltInWideAngleCamera }, AVMediaType.Video, AVCaptureDevicePosition.Back);
-
+            if(deviceDiscovery.Devices.Count() == 0)
+            {
+                return;
+            }
             var device = deviceDiscovery.Devices.Last();
             if (device != null)
             {
